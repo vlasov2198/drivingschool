@@ -303,7 +303,7 @@ namespace drivingschool
                 string.IsNullOrWhiteSpace(starttime_schedule_comboBox.Text) ||
                 string.IsNullOrWhiteSpace(endtime_schedule_comboBox.Text))
             {
-                MessageBox.Show("Выберите студента, локацию, тип занятия и укажите дату и время занятия.", "Ошибка");
+                MessageBox.Show("Выберите курсанта, локацию, тип занятия и укажите дату и время занятия из выпадающих списков", "Ошибка");
                 return;
             }
 
@@ -375,7 +375,7 @@ namespace drivingschool
 
         private void RefreshdbScheduleFromSelectDate()
         {
-            DateTime selectedDate = change_lessondate_scheduledateTimePicker.Value.Date; // Получаем выбранную дату без времени
+            DateTime selectedDate = change_lessondate_scheduledateTimePicker.Value.Date;
 
             SqlDataAdapter dataAdapter = new SqlDataAdapter(
                 "SELECT s.ScheduleID, s.LessonDate, s.StartTime, s.EndTime, st.FirstName + ' ' + st.LastName AS StudentName, " +
@@ -400,6 +400,123 @@ namespace drivingschool
             schedule_dataGridView.Columns["StudentName"].HeaderText = "Курсант";
             schedule_dataGridView.Columns["LocationName"].HeaderText = "Локация";
             schedule_dataGridView.Columns["LessonTypeName"].HeaderText = "Тип занятия";
+        }
+
+        private void students_dataGridView_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0 && students_dataGridView.Rows[e.RowIndex].Selected)
+            {
+                DataGridViewRow selectedRow = students_dataGridView.Rows[e.RowIndex];
+
+                string firstName = selectedRow.Cells["FirstName"].Value.ToString();
+                string lastName = selectedRow.Cells["LastName"].Value.ToString();
+                DateTime birthDate = (DateTime)selectedRow.Cells["BirthDate"].Value;
+                string phone = selectedRow.Cells["Phone"].Value.ToString();
+
+                firstname_students_textBox.Text = firstName;
+                lastname_students_textBox.Text = lastName;
+                birthdate_students_textBox.Text = birthDate.ToString("dd.MM.yyyy");
+                phone_students_textBox.Text = phone;
+
+                add_students_button.Enabled = false;
+            }
+            else
+            {
+                add_students_button.Enabled = true;
+
+                firstname_students_textBox.Clear();
+                lastname_students_textBox.Clear();
+                birthdate_students_textBox.Clear();
+                phone_students_textBox.Clear();
+            }
+        }
+
+        private void locations_dataGridView_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0 && locations_dataGridView.Rows[e.RowIndex].Selected)
+            {
+                DataGridViewRow selectedRow = locations_dataGridView.Rows[e.RowIndex];
+
+                string name = selectedRow.Cells["Name"].Value.ToString();
+                string address = selectedRow.Cells["Address"].Value.ToString();
+                string description = selectedRow.Cells["Description"].Value.ToString();
+
+                name_locations_textBox.Text = name;
+                address_locations_textBox.Text = address;
+                description_locations_textBox.Text = description;
+
+                add_locations_button.Enabled = false;
+            }
+            else
+            {
+                add_locations_button.Enabled = true;
+
+                name_locations_textBox.Clear();
+                address_locations_textBox.Clear();
+                description_locations_textBox.Clear();
+            }
+        }
+
+        private void lessontypes_dataGridView_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0 && lessontypes_dataGridView.Rows[e.RowIndex].Selected)
+            {
+                DataGridViewRow selectedRow = lessontypes_dataGridView.Rows[e.RowIndex];
+
+                string name = selectedRow.Cells["Name"].Value.ToString();
+                string description = selectedRow.Cells["Description"].Value.ToString();
+                string instructorNotes = selectedRow.Cells["InstructorNotes"].Value.ToString();
+
+                name_lessontypes_textBox.Text = name;
+                description_lessontypes_textBox.Text = description;
+                instructornotes_lessontypes_textBox.Text = instructorNotes;
+
+                add_lessontypes_button.Enabled = false;
+            }
+            else
+            {
+                add_lessontypes_button.Enabled = true;
+
+                name_lessontypes_textBox.Clear();
+                description_lessontypes_textBox.Clear();
+                instructornotes_lessontypes_textBox.Clear();
+            }
+        }
+
+        private void schedule_dataGridView_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0 && schedule_dataGridView.Rows[e.RowIndex].Selected)
+            {
+                DataGridViewRow selectedRow = schedule_dataGridView.Rows[e.RowIndex];
+
+                DateTime lessonDate = Convert.ToDateTime(selectedRow.Cells["LessonDate"].Value);
+                TimeSpan startTime = TimeSpan.Parse(selectedRow.Cells["StartTime"].Value.ToString());
+                TimeSpan endTime = TimeSpan.Parse(selectedRow.Cells["EndTime"].Value.ToString());
+                string studentName = selectedRow.Cells["StudentName"].Value.ToString();
+                string locationName = selectedRow.Cells["LocationName"].Value.ToString();
+                string lessonTypeName = selectedRow.Cells["LessonTypeName"].Value.ToString();
+
+                lessondate_schedule_dateTimePicker.Value = lessonDate;
+                starttime_schedule_comboBox.SelectedItem = startTime.ToString("hh\\:mm");
+                endtime_schedule_comboBox.SelectedItem = endTime.ToString("hh\\:mm");
+                studentID_schedule_comboBox.Text = studentName;
+                locationID_schedule_comboBox.Text = locationName;
+                lessontypeID_schedule_comboBox.Text = lessonTypeName;
+
+                add_schedule_button.Enabled = false;
+            }
+            else
+            {
+                add_schedule_button.Enabled = true;
+
+                // Очистите значения элементов управления при снятии выделения
+                lessondate_schedule_dateTimePicker.Value = DateTime.Today;
+                starttime_schedule_comboBox.SelectedIndex = -1;
+                endtime_schedule_comboBox.SelectedIndex = -1;
+                studentID_schedule_comboBox.SelectedIndex = -1;
+                locationID_schedule_comboBox.SelectedIndex = -1;
+                lessontypeID_schedule_comboBox.SelectedIndex = -1;
+            }
         }
     }
 }

@@ -307,6 +307,7 @@
             this.students_dataGridView.ReadOnly = true;
             this.students_dataGridView.Size = new System.Drawing.Size(646, 463);
             this.students_dataGridView.TabIndex = 0;
+            this.students_dataGridView.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.students_dataGridView_CellClick);
             // 
             // tabPage2
             // 
@@ -543,6 +544,7 @@
             this.schedule_dataGridView.ReadOnly = true;
             this.schedule_dataGridView.Size = new System.Drawing.Size(646, 463);
             this.schedule_dataGridView.TabIndex = 23;
+            this.schedule_dataGridView.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.schedule_dataGridView_CellClick);
             // 
             // tabPage3
             // 
@@ -702,6 +704,7 @@
             this.locations_dataGridView.ReadOnly = true;
             this.locations_dataGridView.Size = new System.Drawing.Size(646, 463);
             this.locations_dataGridView.TabIndex = 23;
+            this.locations_dataGridView.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.locations_dataGridView_CellClick);
             // 
             // tabPage4
             // 
@@ -861,6 +864,7 @@
             this.lessontypes_dataGridView.ReadOnly = true;
             this.lessontypes_dataGridView.Size = new System.Drawing.Size(646, 463);
             this.lessontypes_dataGridView.TabIndex = 23;
+            this.lessontypes_dataGridView.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.lessontypes_dataGridView_CellClick);
             // 
             // allschedule_button
             // 
