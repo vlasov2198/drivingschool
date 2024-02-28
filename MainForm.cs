@@ -37,7 +37,7 @@ namespace drivingschool
             Refreshdbstudents();
             Refreshdblocations();
             Refreshdblessontypes();
-            RefreshdbSchedule();
+            RefreshdbScheduleFromSelectDate();
 
             RefreshTimeComboBox();
             RefreshStudentComboBox();
@@ -112,32 +112,10 @@ namespace drivingschool
             schedule_dataGridView.Columns["LessonDate"].HeaderText = "Дата занятия";
             schedule_dataGridView.Columns["StartTime"].HeaderText = "Время начала";
             schedule_dataGridView.Columns["EndTime"].HeaderText = "Время конца";
-            schedule_dataGridView.Columns["StudentName"].HeaderText = "Студент";
+            schedule_dataGridView.Columns["StudentName"].HeaderText = "Курсант";
             schedule_dataGridView.Columns["LocationName"].HeaderText = "Локация";
             schedule_dataGridView.Columns["LessonTypeName"].HeaderText = "Тип занятия";
         }
-
-        /*
-        private void RefreshdbSchedule()
-        {
-            SqlDataAdapter dataAdapter = new SqlDataAdapter(
-                "SELECT * FROM Schedule", sqlConnection);
-
-            DataSet dataSet = new DataSet();
-            dataAdapter.Fill(dataSet);
-
-            schedule_dataGridView.DataSource = dataSet.Tables[0];
-
-            schedule_dataGridView.Columns["ScheduleID"].HeaderText = "ID занятия";
-            schedule_dataGridView.Columns["LessonDate"].HeaderText = "Дата занятия";
-            schedule_dataGridView.Columns["StartTime"].HeaderText = "Время начала";
-            schedule_dataGridView.Columns["EndTime"].HeaderText = "Время конца";
-            schedule_dataGridView.Columns["StudentID"].HeaderText ="ID студента";
-            schedule_dataGridView.Columns["LocationID"].HeaderText = "ID локации";
-            schedule_dataGridView.Columns["LessonTypeID"].HeaderText = "ID типа занятия";
-        }
-         */
-
 
         private void add_students_button_Click(object sender, EventArgs e)
         {
@@ -305,9 +283,8 @@ namespace drivingschool
         {
             for (int hour = 6; hour <= 20; hour++)
             {
-                for (int minute = 0; minute <= 30; minute += 30) // Шаг в 30 минут
+                for (int minute = 0; minute <= 30; minute += 30)
                 {
-                    // Формируем строку времени в формате "HH:mm"
                     string time = string.Format("{0:D2}:{1:D2}", hour, minute);
 
                     // Добавляем время в комбо-боксы
@@ -319,7 +296,110 @@ namespace drivingschool
 
         private void add_schedule_button_Click(object sender, EventArgs e)
         {
+            if (studentID_schedule_comboBox.SelectedItem == null ||
+                locationID_schedule_comboBox.SelectedItem == null ||
+                lessontypeID_schedule_comboBox.SelectedItem == null ||
+                string.IsNullOrWhiteSpace(lessondate_schedule_dateTimePicker.Text) ||
+                string.IsNullOrWhiteSpace(starttime_schedule_comboBox.Text) ||
+                string.IsNullOrWhiteSpace(endtime_schedule_comboBox.Text))
+            {
+                MessageBox.Show("Выберите студента, локацию, тип занятия и укажите дату и время занятия.", "Ошибка");
+                return;
+            }
 
+            int studentID = ((Student)studentID_schedule_comboBox.SelectedItem).StudentID;
+            int locationID = ((Location)locationID_schedule_comboBox.SelectedItem).LocationID;
+            int lessontypeID = ((LessonType)lessontypeID_schedule_comboBox.SelectedItem).LessonTypeID;
+            DateTime lessonDate = lessondate_schedule_dateTimePicker.Value.Date;
+            TimeSpan startTime = TimeSpan.Parse(starttime_schedule_comboBox.Text);
+            TimeSpan endTime = TimeSpan.Parse(endtime_schedule_comboBox.Text);
+
+            if (IsLessonOverlap(lessonDate, startTime, endTime))
+            {
+                MessageBox.Show($"Невозможно добавить занятие. Промежуток времени {lessonDate.ToShortDateString()} c {startTime} по {endTime} занят.", "Ошибка");
+                return;
+            }
+
+            SqlCommand command = new SqlCommand(
+                @"INSERT INTO Schedule (LessonDate, StartTime, EndTime, StudentID, LocationID, LessonTypeID)
+            VALUES (@LessonDate, @StartTime, @EndTime, @StudentID, @LocationID, @LessonTypeID)", sqlConnection);
+
+            command.Parameters.AddWithValue("@LessonDate", lessonDate);
+            command.Parameters.AddWithValue("@StartTime", startTime);
+            command.Parameters.AddWithValue("@EndTime", endTime);
+            command.Parameters.AddWithValue("@StudentID", studentID);
+            command.Parameters.AddWithValue("@LocationID", locationID);
+            command.Parameters.AddWithValue("@LessonTypeID", lessontypeID);
+            
+            int rowsAffected = command.ExecuteNonQuery();
+            if (rowsAffected == 1)
+            {
+                MessageBox.Show("Занятие успешно добавлено.", "Успех");
+                RefreshdbScheduleFromSelectDate();
+            }
+            else
+            {
+                MessageBox.Show("Не удалось добавить занятие.", "Ошибка");
+            }
+        }
+
+        // Метод для проверки пересечения занятий
+        private bool IsLessonOverlap(DateTime lessonDate, TimeSpan startTime, TimeSpan endTime)
+        {
+            SqlCommand command = new SqlCommand(
+                @"SELECT COUNT(*) 
+                FROM Schedule 
+                WHERE LessonDate = @LessonDate 
+                AND (
+                ((@StartTime >= StartTime AND @StartTime < EndTime) OR (@EndTime > StartTime AND @EndTime <= EndTime))
+                OR (StartTime >= @StartTime AND EndTime <= @EndTime)
+                )", sqlConnection);
+
+            command.Parameters.AddWithValue("@LessonDate", lessonDate);
+            command.Parameters.AddWithValue("@StartTime", startTime);
+            command.Parameters.AddWithValue("@EndTime", endTime);
+
+            int count = (int)command.ExecuteScalar();
+            return count > 0;
+        }
+
+        private void change_lessondate_scheduledateTimePicker_ValueChanged(object sender, EventArgs e)
+        {
+            RefreshdbScheduleFromSelectDate();
+        }
+
+        private void allschedule_button_Click(object sender, EventArgs e)
+        {
+            RefreshdbSchedule();
+        }
+
+        private void RefreshdbScheduleFromSelectDate()
+        {
+            DateTime selectedDate = change_lessondate_scheduledateTimePicker.Value.Date; // Получаем выбранную дату без времени
+
+            SqlDataAdapter dataAdapter = new SqlDataAdapter(
+                "SELECT s.ScheduleID, s.LessonDate, s.StartTime, s.EndTime, st.FirstName + ' ' + st.LastName AS StudentName, " +
+                "l.Name AS LocationName, lt.Name AS LessonTypeName " +
+                "FROM Schedule s " +
+                "JOIN Students st ON s.StudentID = st.StudentID " +
+                "JOIN Locations l ON s.LocationID = l.LocationID " +
+                "JOIN LessonTypes lt ON s.LessonTypeID = lt.LessonTypeID " +
+                "WHERE s.LessonDate = @LessonDate", sqlConnection);
+
+            dataAdapter.SelectCommand.Parameters.AddWithValue("@LessonDate", selectedDate);
+
+            DataSet dataSet = new DataSet();
+            dataAdapter.Fill(dataSet);
+
+            schedule_dataGridView.DataSource = dataSet.Tables[0];
+
+            schedule_dataGridView.Columns["ScheduleID"].HeaderText = "ID занятия";
+            schedule_dataGridView.Columns["LessonDate"].HeaderText = "Дата занятия";
+            schedule_dataGridView.Columns["StartTime"].HeaderText = "Время начала";
+            schedule_dataGridView.Columns["EndTime"].HeaderText = "Время конца";
+            schedule_dataGridView.Columns["StudentName"].HeaderText = "Курсант";
+            schedule_dataGridView.Columns["LocationName"].HeaderText = "Локация";
+            schedule_dataGridView.Columns["LessonTypeName"].HeaderText = "Тип занятия";
         }
     }
 }
