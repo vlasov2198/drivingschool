@@ -911,7 +911,90 @@ namespace drivingschool
 
         private void change_schedule_button_Click(object sender, EventArgs e)
         {
+            if (schedule_dataGridView.SelectedRows.Count > 0)
+            {
+                if (lessondate_schedule_dateTimePicker.Value == null ||
+                    string.IsNullOrWhiteSpace(starttime_schedule_comboBox.Text) ||
+                    string.IsNullOrWhiteSpace(endtime_schedule_comboBox.Text) ||
+                    studentID_schedule_comboBox.SelectedItem == null ||
+                    locationID_schedule_comboBox.SelectedItem == null ||
+                    lessontypeID_schedule_comboBox.SelectedItem == null)
+                {
+                    MessageBox.Show("Выберите данные из выпадающих списков и заполните все поля", "Ошибка");
+                    return;
+                }
 
+                int scheduleID = Convert.ToInt32(schedule_dataGridView.SelectedRows[0].Cells["ScheduleID"].Value);
+                DateTime lessonDate = lessondate_schedule_dateTimePicker.Value.Date;
+                TimeSpan startTime;
+                TimeSpan endTime;
+                if (TimeSpan.TryParse(starttime_schedule_comboBox.Text, out startTime) &&
+                    TimeSpan.TryParse(endtime_schedule_comboBox.Text, out endTime))
+                {
+                    int studentID = ((Student)studentID_schedule_comboBox.SelectedItem).StudentID;
+                    int locationID = ((Location)locationID_schedule_comboBox.SelectedItem).LocationID;
+                    int lessontypeID = ((LessonType)lessontypeID_schedule_comboBox.SelectedItem).LessonTypeID;
+
+                    if (IsLessonOverlap_change(lessonDate, startTime, endTime, scheduleID))
+                    {
+                        MessageBox.Show($"Невозможно сохранить изменения. Промежуток времени {lessonDate.ToShortDateString()} с {startTime} по {endTime} занят.", "Ошибка");
+                        return;
+                    }
+
+                    SqlCommand updateScheduleCommand = new SqlCommand(
+                        "UPDATE [Schedule] SET LessonDate = @LessonDate, StartTime = @StartTime, EndTime = @EndTime, StudentID = @StudentID, LocationID = @LocationID, LessonTypeID = @LessonTypeID WHERE ScheduleID = @ScheduleID",
+                        sqlConnection);
+
+                    updateScheduleCommand.Parameters.AddWithValue("@LessonDate", lessonDate);
+                    updateScheduleCommand.Parameters.AddWithValue("@StartTime", startTime);
+                    updateScheduleCommand.Parameters.AddWithValue("@EndTime", endTime);
+                    updateScheduleCommand.Parameters.AddWithValue("@StudentID", studentID);
+                    updateScheduleCommand.Parameters.AddWithValue("@LocationID", locationID);
+                    updateScheduleCommand.Parameters.AddWithValue("@LessonTypeID", lessontypeID);
+                    updateScheduleCommand.Parameters.AddWithValue("@ScheduleID", scheduleID);
+
+                    int rowsAffected = updateScheduleCommand.ExecuteNonQuery();
+
+                    if (rowsAffected > 0)
+                    {
+                        MessageBox.Show("Изменения успешно сохранены в базе данных", "Успех");
+                        RefreshdbSchedule();
+                    }
+                    else
+                    {
+                        MessageBox.Show("Не удалось сохранить изменения в базе данных", "Ошибка");
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Введите корректное время в формате ЧЧ:ММ", "Ошибка");
+                }
+            }
+            else
+            {
+                MessageBox.Show("Выберите запись, которую хотите изменить", "Ошибка");
+            }
+        }
+
+        private bool IsLessonOverlap_change(DateTime lessonDate, TimeSpan startTime, TimeSpan endTime, int currentScheduleID)
+        {
+            SqlCommand command = new SqlCommand(
+                @"SELECT COUNT(*) 
+                FROM Schedule 
+                WHERE LessonDate = @LessonDate 
+                AND (
+                ((@StartTime >= StartTime AND @StartTime < EndTime) OR (@EndTime > StartTime AND @EndTime <= EndTime))
+                OR (StartTime >= @StartTime AND EndTime <= @EndTime)
+                )
+                AND ScheduleID != @CurrentScheduleID", sqlConnection);
+
+            command.Parameters.AddWithValue("@LessonDate", lessonDate);
+            command.Parameters.AddWithValue("@StartTime", startTime);
+            command.Parameters.AddWithValue("@EndTime", endTime);
+            command.Parameters.AddWithValue("@CurrentScheduleID", currentScheduleID);
+
+            int count = (int)command.ExecuteScalar();
+            return count > 0;
         }
     }
 }
