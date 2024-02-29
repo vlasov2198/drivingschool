@@ -417,21 +417,49 @@ namespace drivingschool
                 DateTime birthDate = (DateTime)selectedRow.Cells["BirthDate"].Value;
                 string phone = selectedRow.Cells["Phone"].Value.ToString();
 
-                firstname_students_textBox.Text = firstName;
-                lastname_students_textBox.Text = lastName;
-                birthdate_students_textBox.Text = birthDate.ToString("dd.MM.yyyy");
-                phone_students_textBox.Text = phone;
+                int studentID = (int)selectedRow.Cells["StudentID"].Value;
 
-                add_students_button.Enabled = false;
+                string query = "SELECT SUM(DATEDIFF(MINUTE, StartTime, EndTime)) AS TotalMinutes " +
+                               "FROM Schedule " +
+                               "WHERE StudentID = @StudentID";
+
+                SqlCommand command = new SqlCommand(query, sqlConnection);
+                command.Parameters.AddWithValue("@StudentID", studentID);
+
+                SqlDataReader reader = command.ExecuteReader();
+
+                if (reader.Read() && !reader.IsDBNull(reader.GetOrdinal("TotalMinutes")))
+                {
+                    int totalMinutes = Convert.ToInt32(reader["TotalMinutes"]);
+                    int totalLessons = totalMinutes / 60;
+
+                    firstname_students_textBox.Text = firstName;
+                    lastname_students_textBox.Text = lastName;
+                    birthdate_students_textBox.Text = birthDate.ToString("dd.MM.yyyy");
+                    phone_students_textBox.Text = phone;
+                    info_students_textBox.Text = $"Пройдено занятий: {totalLessons} из 25";
+                }
+                else
+                {
+                    firstname_students_textBox.Text = firstName;
+                    lastname_students_textBox.Text = lastName;
+                    birthdate_students_textBox.Text = birthDate.ToString("dd.MM.yyyy");
+                    phone_students_textBox.Text = phone;
+                    info_students_textBox.Text = "Пройдено занятий: 0 из 25";
+                }
+
+                reader.Close();
             }
             else
             {
-                add_students_button.Enabled = true;
-
+                // Очистка всех текстовых полей при снятии выделения
                 firstname_students_textBox.Clear();
                 lastname_students_textBox.Clear();
                 birthdate_students_textBox.Clear();
                 phone_students_textBox.Clear();
+                info_students_textBox.Clear();
+
+                add_students_button.Enabled = true;
             }
         }
 

@@ -103,6 +103,7 @@
             this.description_lessontypes_textBox = new System.Windows.Forms.TextBox();
             this.name_lessontypes_textBox = new System.Windows.Forms.TextBox();
             this.lessontypes_dataGridView = new System.Windows.Forms.DataGridView();
+            this.info_students_textBox = new System.Windows.Forms.TextBox();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.students_dataGridView)).BeginInit();
@@ -130,6 +131,7 @@
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.info_students_textBox);
             this.tabPage1.Controls.Add(this.label9);
             this.tabPage1.Controls.Add(this.label8);
             this.tabPage1.Controls.Add(this.changecolums_students_comboBox);
@@ -884,6 +886,16 @@
             this.lessontypes_dataGridView.TabIndex = 23;
             this.lessontypes_dataGridView.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.lessontypes_dataGridView_CellClick);
             // 
+            // info_students_textBox
+            // 
+            this.info_students_textBox.Location = new System.Drawing.Point(36, 323);
+            this.info_students_textBox.Multiline = true;
+            this.info_students_textBox.Name = "info_students_textBox";
+            this.info_students_textBox.ReadOnly = true;
+            this.info_students_textBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.info_students_textBox.Size = new System.Drawing.Size(378, 170);
+            this.info_students_textBox.TabIndex = 23;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
@@ -992,6 +1004,7 @@
         private System.Windows.Forms.ComboBox starttime_schedule_comboBox;
         private System.Windows.Forms.DateTimePicker change_lessondate_scheduledateTimePicker;
         private System.Windows.Forms.Button allschedule_button;
+        private System.Windows.Forms.TextBox info_students_textBox;
     }
 }
 
