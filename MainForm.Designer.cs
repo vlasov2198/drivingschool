@@ -258,6 +258,7 @@
             this.change_students_button.TabIndex = 6;
             this.change_students_button.Text = "Изменить";
             this.change_students_button.UseVisualStyleBackColor = true;
+            this.change_students_button.Click += new System.EventHandler(this.change_students_button_Click);
             // 
             // add_students_button
             // 
@@ -534,6 +535,7 @@
             this.change_schedule_button.TabIndex = 29;
             this.change_schedule_button.Text = "Изменить";
             this.change_schedule_button.UseVisualStyleBackColor = true;
+            this.change_schedule_button.Click += new System.EventHandler(this.change_schedule_button_Click);
             // 
             // add_schedule_button
             // 
@@ -681,6 +683,7 @@
             this.change_locations_button.TabIndex = 29;
             this.change_locations_button.Text = "Изменить";
             this.change_locations_button.UseVisualStyleBackColor = true;
+            this.change_locations_button.Click += new System.EventHandler(this.change_locations_button_Click);
             // 
             // add_locations_button
             // 
@@ -835,6 +838,7 @@
             this.change_lessontypes_button.TabIndex = 29;
             this.change_lessontypes_button.Text = "Изменить";
             this.change_lessontypes_button.UseVisualStyleBackColor = true;
+            this.change_lessontypes_button.Click += new System.EventHandler(this.change_lessontypes_button_Click);
             // 
             // add_lessontypes_button
             // 

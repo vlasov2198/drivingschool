@@ -291,7 +291,6 @@ namespace drivingschool
                 {
                     string time = string.Format("{0:D2}:{1:D2}", hour, minute);
 
-                    // Добавляем время в комбо-боксы
                     starttime_schedule_comboBox.Items.Add(time);
                     endtime_schedule_comboBox.Items.Add(time);
                 }
@@ -775,6 +774,144 @@ namespace drivingschool
             {
                 MessageBox.Show("Не удалось удалить выбранные записи о расписании из базы данных.", "Ошибка");
             }
+        }
+
+        private void change_students_button_Click(object sender, EventArgs e)
+        {
+            if (students_dataGridView.SelectedRows.Count > 0)
+            {
+                if (string.IsNullOrWhiteSpace(firstname_students_textBox.Text) ||
+                    string.IsNullOrWhiteSpace(lastname_students_textBox.Text) ||
+                    string.IsNullOrWhiteSpace(birthdate_students_textBox.Text) ||
+                    string.IsNullOrWhiteSpace(phone_students_textBox.Text))
+                {
+                    MessageBox.Show("Введите данные во все поля", "Ошибка");
+                    return;
+                }
+                if (!DateTime.TryParseExact(birthdate_students_textBox.Text, "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime birthDate))
+                {
+                    MessageBox.Show("Неверный формат даты рождения. Используйте формат ДД.ММ.ГГГГ", "Ошибка");
+                    return;
+                }
+
+                int studentID = Convert.ToInt32(students_dataGridView.SelectedRows[0].Cells["StudentID"].Value);
+
+                SqlCommand updateStudentCommand = new SqlCommand(
+                    "UPDATE [Students] SET FirstName = @FirstName, LastName = @LastName, BirthDate = @BirthDate, Phone = @Phone WHERE StudentID = @StudentID",
+                    sqlConnection);
+
+                updateStudentCommand.Parameters.AddWithValue("@FirstName", firstname_students_textBox.Text);
+                updateStudentCommand.Parameters.AddWithValue("@LastName", lastname_students_textBox.Text);
+                updateStudentCommand.Parameters.AddWithValue("@BirthDate", birthDate.ToString("yyyy-MM-dd"));
+                updateStudentCommand.Parameters.AddWithValue("@Phone", phone_students_textBox.Text);
+                updateStudentCommand.Parameters.AddWithValue("@StudentID", studentID);
+
+                int rowsAffected = updateStudentCommand.ExecuteNonQuery();
+
+                if (rowsAffected > 0)
+                {
+                    MessageBox.Show("Изменения успешно сохранены в базе данных", "Успех");
+                    Refreshdbstudents();
+                    RefreshStudentComboBox();
+                }
+                else
+                {
+                    MessageBox.Show("Не удалось сохранить изменения в базе данных", "Ошибка");
+                }
+            }
+            else
+            {
+                MessageBox.Show("Выберите запись, которую хотите изменить", "Ошибка");
+            }
+        }
+
+        private void change_locations_button_Click(object sender, EventArgs e)
+        {
+            if (locations_dataGridView.SelectedRows.Count > 0)
+            {
+                if (string.IsNullOrWhiteSpace(name_locations_textBox.Text) ||
+                    string.IsNullOrWhiteSpace(address_locations_textBox.Text) ||
+                    string.IsNullOrWhiteSpace(description_locations_textBox.Text))
+                {
+                    MessageBox.Show("Введите данные во все поля", "Ошибка");
+                    return;
+                }
+
+                int locationID = Convert.ToInt32(locations_dataGridView.SelectedRows[0].Cells["LocationID"].Value);
+
+                SqlCommand updateLocationCommand = new SqlCommand(
+                    "UPDATE [Locations] SET Name = @Name, Address = @Address, Description = @Description WHERE LocationID = @LocationID",
+                    sqlConnection);
+
+                updateLocationCommand.Parameters.AddWithValue("@Name", name_locations_textBox.Text);
+                updateLocationCommand.Parameters.AddWithValue("@Address", address_locations_textBox.Text);
+                updateLocationCommand.Parameters.AddWithValue("@Description", description_locations_textBox.Text);
+                updateLocationCommand.Parameters.AddWithValue("@LocationID", locationID);
+
+                int rowsAffected = updateLocationCommand.ExecuteNonQuery();
+
+                if (rowsAffected > 0)
+                {
+                    MessageBox.Show("Изменения успешно сохранены в базе данных", "Успех");
+                    Refreshdblocations();
+                    RefreshLocationComboBox();
+                }
+                else
+                {
+                    MessageBox.Show("Не удалось сохранить изменения в базе данных", "Ошибка");
+                }
+            }
+            else
+            {
+                MessageBox.Show("Выберите запись, которую хотите изменить", "Ошибка");
+            }
+        }
+
+        private void change_lessontypes_button_Click(object sender, EventArgs e)
+        {
+            if (lessontypes_dataGridView.SelectedRows.Count > 0)
+            {
+                if (string.IsNullOrWhiteSpace(name_lessontypes_textBox.Text) ||
+                    string.IsNullOrWhiteSpace(description_lessontypes_textBox.Text) ||
+                    string.IsNullOrWhiteSpace(instructornotes_lessontypes_textBox.Text))
+                {
+                    MessageBox.Show("Введите данные во все поля", "Ошибка");
+                    return;
+                }
+
+                int lessonTypeID = Convert.ToInt32(lessontypes_dataGridView.SelectedRows[0].Cells["LessonTypeID"].Value);
+
+                SqlCommand updateLessonTypeCommand = new SqlCommand(
+                    "UPDATE [LessonTypes] SET Name = @Name, Description = @Description, InstructorNotes = @InstructorNotes WHERE LessonTypeID = @LessonTypeID",
+                    sqlConnection);
+
+                updateLessonTypeCommand.Parameters.AddWithValue("@Name", name_lessontypes_textBox.Text);
+                updateLessonTypeCommand.Parameters.AddWithValue("@Description", description_lessontypes_textBox.Text);
+                updateLessonTypeCommand.Parameters.AddWithValue("@InstructorNotes", instructornotes_lessontypes_textBox.Text);
+                updateLessonTypeCommand.Parameters.AddWithValue("@LessonTypeID", lessonTypeID);
+
+                int rowsAffected = updateLessonTypeCommand.ExecuteNonQuery();
+
+                if (rowsAffected > 0)
+                {
+                    MessageBox.Show("Изменения успешно сохранены в базе данных", "Успех");
+                    RefreshLessonTypeComboBox();
+                    Refreshdblessontypes();
+                }
+                else
+                {
+                    MessageBox.Show("Не удалось сохранить изменения в базе данных", "Ошибка");
+                }
+            }
+            else
+            {
+                MessageBox.Show("Выберите запись, которую хотите изменить", "Ошибка");
+            }
+        }
+
+        private void change_schedule_button_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }
