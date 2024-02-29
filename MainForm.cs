@@ -89,6 +89,7 @@ namespace drivingschool
 
             lessontypes_dataGridView.Columns["LessonTypeID"].HeaderText = "ID типа занятия";
             lessontypes_dataGridView.Columns["Name"].HeaderText = "Именование";
+            lessontypes_dataGridView.Columns["Description"].HeaderText = "Описание";
             lessontypes_dataGridView.Columns["InstructorNotes"].HeaderText = "Заметка инструктора";
         }
 
@@ -159,6 +160,7 @@ namespace drivingschool
                 MessageBox.Show("Не удалось добавить данные.", "Ошибка");
             }
             Refreshdbstudents();
+            RefreshStudentComboBox();
         }
 
         private void add_locations_button_Click(object sender, EventArgs e)
@@ -192,6 +194,7 @@ namespace drivingschool
                 MessageBox.Show("Не удалось добавить данные.", "Ошибка");
             }
             Refreshdblocations();
+            RefreshLocationComboBox();
         }
 
         private void add_lessontypes_button_Click(object sender, EventArgs e)
@@ -224,6 +227,7 @@ namespace drivingschool
                 MessageBox.Show("Не удалось добавить данные.", "Ошибка");
             }
             Refreshdblessontypes();
+            RefreshLessonTypeComboBox();
         }
 
 
@@ -336,6 +340,7 @@ namespace drivingschool
             {
                 MessageBox.Show("Занятие успешно добавлено.", "Успех");
                 RefreshdbScheduleFromSelectDate();
+
             }
             else
             {
@@ -509,13 +514,266 @@ namespace drivingschool
             {
                 add_schedule_button.Enabled = true;
 
-                // Очистите значения элементов управления при снятии выделения
                 lessondate_schedule_dateTimePicker.Value = DateTime.Today;
                 starttime_schedule_comboBox.SelectedIndex = -1;
                 endtime_schedule_comboBox.SelectedIndex = -1;
                 studentID_schedule_comboBox.SelectedIndex = -1;
                 locationID_schedule_comboBox.SelectedIndex = -1;
                 lessontypeID_schedule_comboBox.SelectedIndex = -1;
+            }
+        }
+
+        private void delete_students_button_Click(object sender, EventArgs e)
+        {
+            if (students_dataGridView.SelectedRows.Count == 0)
+            {
+                MessageBox.Show("Выберите студентов для удаления", "Ошибка");
+                return;
+            }
+
+            StringBuilder deletedStudents = new StringBuilder();
+
+            foreach (DataGridViewRow selectedRow in students_dataGridView.SelectedRows)
+            {
+                string firstName = selectedRow.Cells["FirstName"].Value.ToString();
+                string lastName = selectedRow.Cells["LastName"].Value.ToString();
+                int studentID = Convert.ToInt32(selectedRow.Cells["StudentID"].Value);
+
+                SqlCommand checkScheduleCommand = new SqlCommand(
+                    "SELECT COUNT(*) FROM [Schedule] WHERE StudentID = @StudentID",
+                    sqlConnection);
+
+                checkScheduleCommand.Parameters.AddWithValue("StudentID", studentID);
+                int scheduleCount = (int)checkScheduleCommand.ExecuteScalar();
+
+                string message = $"Вы уверены, что хотите удалить студента {firstName} {lastName} из базы данных?";
+                if (scheduleCount > 0)
+                {
+                    message += $"\nУ этого студента есть записи в расписании ({scheduleCount} записей). Хотите удалить их вместе с курсантом?";
+                }
+
+                DialogResult dialogResult = MessageBox.Show(message, "Подтверждение удаления", MessageBoxButtons.YesNo);
+                if (dialogResult == DialogResult.Yes)
+                {
+                    if (scheduleCount > 0)
+                    {
+                        SqlCommand deleteScheduleCommand = new SqlCommand(
+                            "DELETE FROM [Schedule] WHERE StudentID = @StudentID",
+                            sqlConnection);
+
+                        deleteScheduleCommand.Parameters.AddWithValue("StudentID", studentID);
+                        deleteScheduleCommand.ExecuteNonQuery();
+                    }
+
+                    SqlCommand deleteStudentCommand = new SqlCommand(
+                        "DELETE FROM [Students] WHERE StudentID = @StudentID",
+                        sqlConnection);
+                    deleteStudentCommand.Parameters.AddWithValue("StudentID", studentID);
+
+                    int rowsAffected = deleteStudentCommand.ExecuteNonQuery();
+
+                    if (rowsAffected > 0)
+                    {
+                        deletedStudents.AppendLine($"{firstName} {lastName}");
+                    }
+                }
+            }
+
+            string deletedStudentsMessage = "Следующие студенты были успешно удалены из базы данных:\n\n" + deletedStudents.ToString();
+            if (!string.IsNullOrWhiteSpace(deletedStudents.ToString()))
+            {
+                MessageBox.Show(deletedStudentsMessage, "Успех");
+                RefreshStudentComboBox();
+                Refreshdbstudents();
+            }
+            else
+            {
+                MessageBox.Show("Не удалось удалить выбранных студентов из базы данных.", "Ошибка");
+            }
+        }
+
+        private void delete_locations_button_Click(object sender, EventArgs e)
+        {
+            if (locations_dataGridView.SelectedRows.Count == 0)
+            {
+                MessageBox.Show("Выберите местоположения для удаления", "Ошибка");
+                return;
+            }
+
+            StringBuilder deletedLocations = new StringBuilder();
+
+            foreach (DataGridViewRow selectedRow in locations_dataGridView.SelectedRows)
+            {
+                string locationName = selectedRow.Cells["Name"].Value.ToString();
+                int locationID = Convert.ToInt32(selectedRow.Cells["LocationID"].Value);
+
+                SqlCommand checkScheduleCommand = new SqlCommand(
+                    "SELECT COUNT(*) FROM [Schedule] WHERE LocationID = @LocationID",
+                    sqlConnection);
+
+                checkScheduleCommand.Parameters.AddWithValue("LocationID", locationID);
+                int scheduleCount = (int)checkScheduleCommand.ExecuteScalar();
+
+                string message = $"Вы уверены, что хотите удалить местоположение '{locationName}' из базы данных?";
+                if (scheduleCount > 0)
+                {
+                    message += $"\nУ этого местоположения есть записи в расписании ({scheduleCount} записей). Хотите удалить их вместе с местоположением?";
+                }
+
+                DialogResult dialogResult = MessageBox.Show(message, "Подтверждение удаления", MessageBoxButtons.YesNo);
+                if (dialogResult == DialogResult.Yes)
+                {
+                    if (scheduleCount > 0)
+                    {
+                        SqlCommand deleteScheduleCommand = new SqlCommand(
+                            "DELETE FROM [Schedule] WHERE LocationID = @LocationID",
+                            sqlConnection);
+
+                        deleteScheduleCommand.Parameters.AddWithValue("LocationID", locationID);
+                        deleteScheduleCommand.ExecuteNonQuery();
+                    }
+
+                    SqlCommand deleteLocationCommand = new SqlCommand(
+                        "DELETE FROM [Locations] WHERE LocationID = @LocationID",
+                        sqlConnection);
+                    deleteLocationCommand.Parameters.AddWithValue("LocationID", locationID);
+
+                    int rowsAffected = deleteLocationCommand.ExecuteNonQuery();
+
+                    if (rowsAffected > 0)
+                    {
+                        deletedLocations.AppendLine(locationName);
+                    }
+                }
+            }
+
+            string deletedLocationsMessage = "Следующие местоположения были успешно удалены из базы данных:\n\n" + deletedLocations.ToString();
+            if (!string.IsNullOrWhiteSpace(deletedLocations.ToString()))
+            {
+                MessageBox.Show(deletedLocationsMessage, "Успех");
+                Refreshdblocations();
+                RefreshLocationComboBox();
+            }
+            else
+            {
+                MessageBox.Show("Не удалось удалить выбранные местоположения из базы данных.", "Ошибка");
+            }
+        }
+
+        private void delete_lessontypes_button_Click(object sender, EventArgs e)
+        {
+            if (lessontypes_dataGridView.SelectedRows.Count == 0)
+            {
+                MessageBox.Show("Выберите типы занятий для удаления", "Ошибка");
+                return;
+            }
+
+            StringBuilder deletedLessonTypes = new StringBuilder();
+
+            foreach (DataGridViewRow selectedRow in lessontypes_dataGridView.SelectedRows)
+            {
+                string lessonTypeName = selectedRow.Cells["Name"].Value.ToString();
+                int lessonTypeID = Convert.ToInt32(selectedRow.Cells["LessonTypeID"].Value);
+
+                SqlCommand checkScheduleCommand = new SqlCommand(
+                    "SELECT COUNT(*) FROM [Schedule] WHERE LessonTypeID = @LessonTypeID",
+                    sqlConnection);
+
+                checkScheduleCommand.Parameters.AddWithValue("LessonTypeID", lessonTypeID);
+                int scheduleCount = (int)checkScheduleCommand.ExecuteScalar();
+
+                string message = $"Вы уверены, что хотите удалить тип занятия '{lessonTypeName}' из базы данных?";
+                if (scheduleCount > 0)
+                {
+                    message += $"\nУ этого типа занятия есть записи в расписании ({scheduleCount} записей). Хотите удалить их вместе с типом занятия?";
+                }
+
+                DialogResult dialogResult = MessageBox.Show(message, "Подтверждение удаления", MessageBoxButtons.YesNo);
+                if (dialogResult == DialogResult.Yes)
+                {
+                    if (scheduleCount > 0)
+                    {
+                        SqlCommand deleteScheduleCommand = new SqlCommand(
+                            "DELETE FROM [Schedule] WHERE LessonTypeID = @LessonTypeID",
+                            sqlConnection);
+
+                        deleteScheduleCommand.Parameters.AddWithValue("LessonTypeID", lessonTypeID);
+                        deleteScheduleCommand.ExecuteNonQuery();
+                    }
+
+                    SqlCommand deleteLessonTypeCommand = new SqlCommand(
+                        "DELETE FROM [LessonTypes] WHERE LessonTypeID = @LessonTypeID",
+                        sqlConnection);
+                    deleteLessonTypeCommand.Parameters.AddWithValue("LessonTypeID", lessonTypeID);
+
+                    int rowsAffected = deleteLessonTypeCommand.ExecuteNonQuery();
+
+                    if (rowsAffected > 0)
+                    {
+                        deletedLessonTypes.AppendLine(lessonTypeName);
+                    }
+                }
+            }
+
+            string deletedLessonTypesMessage = "Следующие типы занятий были успешно удалены из базы данных:\n\n" + deletedLessonTypes.ToString();
+            if (!string.IsNullOrWhiteSpace(deletedLessonTypes.ToString()))
+            {
+                MessageBox.Show(deletedLessonTypesMessage, "Успех");
+                Refreshdblessontypes();
+                RefreshLessonTypeComboBox();
+            }
+            else
+            {
+                MessageBox.Show("Не удалось удалить выбранные типы занятий из базы данных.", "Ошибка");
+            }
+        }
+
+        private void delete_schedule_button_Click(object sender, EventArgs e)
+        {
+            if (schedule_dataGridView.SelectedRows.Count == 0)
+            {
+                MessageBox.Show("Выберите записи о расписании для удаления", "Ошибка");
+                return;
+            }
+
+            StringBuilder deletedSchedules = new StringBuilder();
+
+            foreach (DataGridViewRow selectedRow in schedule_dataGridView.SelectedRows)
+            {
+                int scheduleID = Convert.ToInt32(selectedRow.Cells["ScheduleID"].Value);
+                DateTime lessonDate = Convert.ToDateTime(selectedRow.Cells["LessonDate"].Value);
+                TimeSpan startTime = TimeSpan.Parse(selectedRow.Cells["StartTime"].Value.ToString());
+                TimeSpan endTime = TimeSpan.Parse(selectedRow.Cells["EndTime"].Value.ToString());
+                string studentName = selectedRow.Cells["StudentName"].Value.ToString();
+
+                string message = $"Вы уверены, что хотите удалить запись о расписании для курсанта {studentName} на {lessonDate.ToShortDateString()} c {startTime} по {endTime}?";
+
+                DialogResult dialogResult = MessageBox.Show(message, "Подтверждение удаления", MessageBoxButtons.YesNo);
+                if (dialogResult == DialogResult.Yes)
+                {
+                    SqlCommand deleteScheduleCommand = new SqlCommand(
+                        "DELETE FROM [Schedule] WHERE ScheduleID = @ScheduleID",
+                        sqlConnection);
+                    deleteScheduleCommand.Parameters.AddWithValue("ScheduleID", scheduleID);
+
+                    int rowsAffected = deleteScheduleCommand.ExecuteNonQuery();
+
+                    if (rowsAffected > 0)
+                    {
+                        deletedSchedules.AppendLine($"Расписание для курсанта {studentName} на {lessonDate.ToShortDateString()} c {startTime} по {endTime}");
+                    }
+                }
+            }
+
+            string deletedSchedulesMessage = "Следующие записи о расписании были успешно удалены из базы данных:\n\n" + deletedSchedules.ToString();
+            if (!string.IsNullOrWhiteSpace(deletedSchedules.ToString()))
+            {
+                MessageBox.Show(deletedSchedulesMessage, "Успех");
+                RefreshdbScheduleFromSelectDate();
+            }
+            else
+            {
+                MessageBox.Show("Не удалось удалить выбранные записи о расписании из базы данных.", "Ошибка");
             }
         }
     }

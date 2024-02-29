@@ -48,6 +48,7 @@
             this.firstname_students_textBox = new System.Windows.Forms.TextBox();
             this.students_dataGridView = new System.Windows.Forms.DataGridView();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.allschedule_button = new System.Windows.Forms.Button();
             this.change_lessondate_scheduledateTimePicker = new System.Windows.Forms.DateTimePicker();
             this.endtime_schedule_comboBox = new System.Windows.Forms.ComboBox();
             this.starttime_schedule_comboBox = new System.Windows.Forms.ComboBox();
@@ -102,7 +103,6 @@
             this.description_lessontypes_textBox = new System.Windows.Forms.TextBox();
             this.name_lessontypes_textBox = new System.Windows.Forms.TextBox();
             this.lessontypes_dataGridView = new System.Windows.Forms.DataGridView();
-            this.allschedule_button = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.students_dataGridView)).BeginInit();
@@ -248,6 +248,7 @@
             this.delete_students_button.TabIndex = 7;
             this.delete_students_button.Text = "Удалить";
             this.delete_students_button.UseVisualStyleBackColor = true;
+            this.delete_students_button.Click += new System.EventHandler(this.delete_students_button_Click);
             // 
             // change_students_button
             // 
@@ -342,6 +343,16 @@
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Расписание";
             this.tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // allschedule_button
+            // 
+            this.allschedule_button.Location = new System.Drawing.Point(779, 93);
+            this.allschedule_button.Name = "allschedule_button";
+            this.allschedule_button.Size = new System.Drawing.Size(167, 49);
+            this.allschedule_button.TabIndex = 53;
+            this.allschedule_button.Text = "За все дни";
+            this.allschedule_button.UseVisualStyleBackColor = true;
+            this.allschedule_button.Click += new System.EventHandler(this.allschedule_button_Click);
             // 
             // change_lessondate_scheduledateTimePicker
             // 
@@ -513,6 +524,7 @@
             this.delete_schedule_button.TabIndex = 30;
             this.delete_schedule_button.Text = "Удалить";
             this.delete_schedule_button.UseVisualStyleBackColor = true;
+            this.delete_schedule_button.Click += new System.EventHandler(this.delete_schedule_button_Click);
             // 
             // change_schedule_button
             // 
@@ -659,6 +671,7 @@
             this.delete_locations_button.TabIndex = 30;
             this.delete_locations_button.Text = "Удалить";
             this.delete_locations_button.UseVisualStyleBackColor = true;
+            this.delete_locations_button.Click += new System.EventHandler(this.delete_locations_button_Click);
             // 
             // change_locations_button
             // 
@@ -812,6 +825,7 @@
             this.delete_lessontypes_button.TabIndex = 30;
             this.delete_lessontypes_button.Text = "Удалить";
             this.delete_lessontypes_button.UseVisualStyleBackColor = true;
+            this.delete_lessontypes_button.Click += new System.EventHandler(this.delete_lessontypes_button_Click);
             // 
             // change_lessontypes_button
             // 
@@ -865,16 +879,6 @@
             this.lessontypes_dataGridView.Size = new System.Drawing.Size(646, 463);
             this.lessontypes_dataGridView.TabIndex = 23;
             this.lessontypes_dataGridView.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.lessontypes_dataGridView_CellClick);
-            // 
-            // allschedule_button
-            // 
-            this.allschedule_button.Location = new System.Drawing.Point(779, 93);
-            this.allschedule_button.Name = "allschedule_button";
-            this.allschedule_button.Size = new System.Drawing.Size(167, 49);
-            this.allschedule_button.TabIndex = 53;
-            this.allschedule_button.Text = "За все дни";
-            this.allschedule_button.UseVisualStyleBackColor = true;
-            this.allschedule_button.Click += new System.EventHandler(this.allschedule_button_Click);
             // 
             // MainForm
             // 
