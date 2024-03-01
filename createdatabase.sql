@@ -29,6 +29,7 @@ CREATE TABLE Schedule (
     LessonDate DATE,
     StartTime TIME,
     EndTime TIME,
+    Mark INT,
     StudentID INT FOREIGN KEY REFERENCES Students(StudentID),
     LocationID INT FOREIGN KEY REFERENCES Locations(LocationID),
     LessonTypeID INT FOREIGN KEY REFERENCES LessonTypes(LessonTypeID)

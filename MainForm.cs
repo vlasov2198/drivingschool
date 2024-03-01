@@ -98,7 +98,7 @@ namespace drivingschool
         {
             SqlDataAdapter dataAdapter = new SqlDataAdapter(
                 "SELECT s.ScheduleID, s.LessonDate, s.StartTime, s.EndTime, st.FirstName + ' ' + st.LastName AS StudentName, " +
-                "l.Name AS LocationName, lt.Name AS LessonTypeName " +
+                "l.Name AS LocationName, lt.Name AS LessonTypeName, s.Mark " +
                 "FROM Schedule s " +
                 "JOIN Students st ON s.StudentID = st.StudentID " +
                 "JOIN Locations l ON s.LocationID = l.LocationID " +
@@ -109,6 +109,7 @@ namespace drivingschool
 
             schedule_dataGridView.DataSource = dataSet.Tables[0];
 
+            // Установка заголовков столбцов
             schedule_dataGridView.Columns["ScheduleID"].HeaderText = "ID занятия";
             schedule_dataGridView.Columns["LessonDate"].HeaderText = "Дата занятия";
             schedule_dataGridView.Columns["StartTime"].HeaderText = "Время начала";
@@ -116,6 +117,7 @@ namespace drivingschool
             schedule_dataGridView.Columns["StudentName"].HeaderText = "Курсант";
             schedule_dataGridView.Columns["LocationName"].HeaderText = "Локация";
             schedule_dataGridView.Columns["LessonTypeName"].HeaderText = "Тип занятия";
+            schedule_dataGridView.Columns["Mark"].HeaderText = "Оценка"; // Добавленный столбец для оценок
         }
 
         private void add_students_button_Click(object sender, EventArgs e)
@@ -383,7 +385,7 @@ namespace drivingschool
 
             SqlDataAdapter dataAdapter = new SqlDataAdapter(
                 "SELECT s.ScheduleID, s.LessonDate, s.StartTime, s.EndTime, st.FirstName + ' ' + st.LastName AS StudentName, " +
-                "l.Name AS LocationName, lt.Name AS LessonTypeName " +
+                "l.Name AS LocationName, lt.Name AS LessonTypeName, s.Mark " +
                 "FROM Schedule s " +
                 "JOIN Students st ON s.StudentID = st.StudentID " +
                 "JOIN Locations l ON s.LocationID = l.LocationID " +
@@ -397,6 +399,7 @@ namespace drivingschool
 
             schedule_dataGridView.DataSource = dataSet.Tables[0];
 
+            // Установка заголовков столбцов
             schedule_dataGridView.Columns["ScheduleID"].HeaderText = "ID занятия";
             schedule_dataGridView.Columns["LessonDate"].HeaderText = "Дата занятия";
             schedule_dataGridView.Columns["StartTime"].HeaderText = "Время начала";
@@ -404,7 +407,9 @@ namespace drivingschool
             schedule_dataGridView.Columns["StudentName"].HeaderText = "Курсант";
             schedule_dataGridView.Columns["LocationName"].HeaderText = "Локация";
             schedule_dataGridView.Columns["LessonTypeName"].HeaderText = "Тип занятия";
+            schedule_dataGridView.Columns["Mark"].HeaderText = "Оценка"; // Добавленный столбец для оценок
         }
+
 
         private void students_dataGridView_CellClick(object sender, DataGridViewCellEventArgs e)
         {
@@ -419,40 +424,107 @@ namespace drivingschool
 
                 int studentID = (int)selectedRow.Cells["StudentID"].Value;
 
-                string query = "SELECT SUM(DATEDIFF(MINUTE, StartTime, EndTime)) AS TotalMinutes " +
-                               "FROM Schedule " +
-                               "WHERE StudentID = @StudentID";
+                string queryStudentLessons = "SELECT COUNT(*) AS StudentLessons FROM Schedule WHERE StudentID = @StudentID";
+                string queryFirstLesson = "SELECT MIN(LessonDate) AS FirstLesson FROM Schedule WHERE StudentID = @StudentID";
+                string queryLastLesson = "SELECT MAX(LessonDate) AS LastLesson FROM Schedule WHERE StudentID = @StudentID";
+                string queryTotalMarks = "SELECT COUNT(*) AS TotalMarks FROM Schedule WHERE StudentID = @StudentID AND Mark IS NOT NULL";
+                string queryAverageMark = "SELECT AVG(CAST(Mark AS FLOAT)) AS AverageMark FROM Schedule WHERE StudentID = @StudentID";
+                string queryZeroMarks = "SELECT COUNT(*) AS ZeroMarks FROM Schedule WHERE StudentID = @StudentID AND Mark = 0";
 
-                SqlCommand command = new SqlCommand(query, sqlConnection);
-                command.Parameters.AddWithValue("@StudentID", studentID);
+                SqlCommand commandStudentLessons = new SqlCommand(queryStudentLessons, sqlConnection);
+                commandStudentLessons.Parameters.AddWithValue("@StudentID", studentID);
 
-                SqlDataReader reader = command.ExecuteReader();
+                SqlCommand commandFirstLesson = new SqlCommand(queryFirstLesson, sqlConnection);
+                commandFirstLesson.Parameters.AddWithValue("@StudentID", studentID);
 
-                if (reader.Read() && !reader.IsDBNull(reader.GetOrdinal("TotalMinutes")))
+                SqlCommand commandLastLesson = new SqlCommand(queryLastLesson, sqlConnection);
+                commandLastLesson.Parameters.AddWithValue("@StudentID", studentID);
+
+                SqlCommand commandTotalMarks = new SqlCommand(queryTotalMarks, sqlConnection);
+                commandTotalMarks.Parameters.AddWithValue("@StudentID", studentID);
+
+                SqlCommand commandAverageMark = new SqlCommand(queryAverageMark, sqlConnection);
+                commandAverageMark.Parameters.AddWithValue("@StudentID", studentID);
+
+                SqlCommand commandZeroMarks = new SqlCommand(queryZeroMarks, sqlConnection);
+                commandZeroMarks.Parameters.AddWithValue("@StudentID", studentID);
+
+                int studentLessons = 0;
+                DateTime? firstLessonDate = null;
+                DateTime? lastLessonDate = null;
+                int totalMarks = 0;
+                double averageMark = 0;
+                int zeroMarks = 0;
+
+                SqlDataReader reader = null;
+                try
                 {
-                    int totalMinutes = Convert.ToInt32(reader["TotalMinutes"]);
-                    int totalLessons = totalMinutes / 60;
+                    reader = commandStudentLessons.ExecuteReader();
+                    if (reader.Read() && !reader.IsDBNull(reader.GetOrdinal("StudentLessons")))
+                    {
+                        studentLessons = Convert.ToInt32(reader["StudentLessons"]);
+                    }
+                    reader.Close();
 
-                    firstname_students_textBox.Text = firstName;
-                    lastname_students_textBox.Text = lastName;
-                    birthdate_students_textBox.Text = birthDate.ToString("dd.MM.yyyy");
-                    phone_students_textBox.Text = phone;
-                    info_students_textBox.Text = $"Пройдено занятий: {totalLessons} из 25";
+                    reader = commandFirstLesson.ExecuteReader();
+                    if (reader.Read() && !reader.IsDBNull(reader.GetOrdinal("FirstLesson")))
+                    {
+                        firstLessonDate = Convert.ToDateTime(reader["FirstLesson"]);
+                    }
+                    reader.Close();
+
+                    reader = commandLastLesson.ExecuteReader();
+                    if (reader.Read() && !reader.IsDBNull(reader.GetOrdinal("LastLesson")))
+                    {
+                        lastLessonDate = Convert.ToDateTime(reader["LastLesson"]);
+                    }
+                    reader.Close();
+
+                    reader = commandTotalMarks.ExecuteReader();
+                    if (reader.Read() && !reader.IsDBNull(reader.GetOrdinal("TotalMarks")))
+                    {
+                        totalMarks = Convert.ToInt32(reader["TotalMarks"]);
+                    }
+                    reader.Close();
+
+                    reader = commandAverageMark.ExecuteReader();
+                    if (reader.Read() && !reader.IsDBNull(reader.GetOrdinal("AverageMark")))
+                    {
+                        averageMark = Convert.ToDouble(reader["AverageMark"]);
+                    }
+                    reader.Close();
+
+                    reader = commandZeroMarks.ExecuteReader();
+                    if (reader.Read() && !reader.IsDBNull(reader.GetOrdinal("ZeroMarks")))
+                    {
+                        zeroMarks = Convert.ToInt32(reader["ZeroMarks"]);
+                    }
                 }
-                else
+                finally
                 {
-                    firstname_students_textBox.Text = firstName;
-                    lastname_students_textBox.Text = lastName;
-                    birthdate_students_textBox.Text = birthDate.ToString("dd.MM.yyyy");
-                    phone_students_textBox.Text = phone;
-                    info_students_textBox.Text = "Пройдено занятий: 0 из 25";
+                    reader?.Close();
                 }
 
-                reader.Close();
+                double percent = 25 == 0 ? 0 : ((double)studentLessons / 25) * 100;
+
+                firstname_students_textBox.Text = firstName;
+                lastname_students_textBox.Text = lastName;
+                birthdate_students_textBox.Text = birthDate.ToString("dd.MM.yyyy");
+                phone_students_textBox.Text = phone;
+                info_students_textBox.Text =    $"Пройдено занятий: {studentLessons} из 25 ({percent:F2}%)." +
+                                                $"{Environment.NewLine}" +
+                                                $"{Environment.NewLine}Первое занятие в расписании: {firstLessonDate?.ToString("dd.MM.yyyy") ?? "нет данных в расписании"}" +
+                                                $"{Environment.NewLine}Последнее занятие в расписании: {lastLessonDate?.ToString("dd.MM.yyyy") ?? "нет данных в расписании"}" +
+                                                $"{Environment.NewLine}" +
+                                                $"{Environment.NewLine}Общее количество оценок: {totalMarks}" +
+                                                $"{Environment.NewLine}Средний балл: {averageMark:F2}" +
+                                                $"{Environment.NewLine}" +
+                                                $"{Environment.NewLine}Количество несданных занятий: {zeroMarks}";
+            
+                add_students_button.Enabled = false;
             }
             else
             {
-                // Очистка всех текстовых полей при снятии выделения
                 firstname_students_textBox.Clear();
                 lastname_students_textBox.Clear();
                 birthdate_students_textBox.Clear();
@@ -527,6 +599,7 @@ namespace drivingschool
                 string studentName = selectedRow.Cells["StudentName"].Value.ToString();
                 string locationName = selectedRow.Cells["LocationName"].Value.ToString();
                 string lessonTypeName = selectedRow.Cells["LessonTypeName"].Value.ToString();
+                string mark = selectedRow.Cells["Mark"].Value.ToString();
 
                 lessondate_schedule_dateTimePicker.Value = lessonDate;
                 starttime_schedule_comboBox.SelectedItem = startTime.ToString("hh\\:mm");
@@ -534,11 +607,17 @@ namespace drivingschool
                 studentID_schedule_comboBox.Text = studentName;
                 locationID_schedule_comboBox.Text = locationName;
                 lessontypeID_schedule_comboBox.Text = lessonTypeName;
+                mark_schedule_textBox.Text = mark;
 
                 add_schedule_button.Enabled = false;
+                mark_schedule_label.Visible = true;
+                mark_schedule_textBox.Visible = true;
             }
             else
             {
+                mark_schedule_label.Visible = false;
+                mark_schedule_textBox.Visible = false;
+
                 add_schedule_button.Enabled = true;
 
                 lessondate_schedule_dateTimePicker.Value = DateTime.Today;
@@ -547,6 +626,7 @@ namespace drivingschool
                 studentID_schedule_comboBox.SelectedIndex = -1;
                 locationID_schedule_comboBox.SelectedIndex = -1;
                 lessontypeID_schedule_comboBox.SelectedIndex = -1;
+                mark_schedule_textBox.Clear();
             }
         }
 
@@ -772,8 +852,9 @@ namespace drivingschool
                 TimeSpan startTime = TimeSpan.Parse(selectedRow.Cells["StartTime"].Value.ToString());
                 TimeSpan endTime = TimeSpan.Parse(selectedRow.Cells["EndTime"].Value.ToString());
                 string studentName = selectedRow.Cells["StudentName"].Value.ToString();
+                int mark = Convert.ToInt32(selectedRow.Cells["Mark"].Value);
 
-                string message = $"Вы уверены, что хотите удалить запись о расписании для курсанта {studentName} на {lessonDate.ToShortDateString()} c {startTime} по {endTime}?";
+                string message = $"Вы уверены, что хотите удалить запись о расписании для курсанта {studentName} на {lessonDate.ToShortDateString()} c {startTime} по {endTime} c отметкой {mark}?";
 
                 DialogResult dialogResult = MessageBox.Show(message, "Подтверждение удаления", MessageBoxButtons.YesNo);
                 if (dialogResult == DialogResult.Yes)
@@ -787,7 +868,7 @@ namespace drivingschool
 
                     if (rowsAffected > 0)
                     {
-                        deletedSchedules.AppendLine($"Расписание для курсанта {studentName} на {lessonDate.ToShortDateString()} c {startTime} по {endTime}");
+                        deletedSchedules.AppendLine($"Расписание для курсанта {studentName} на {lessonDate.ToShortDateString()} c {startTime} по {endTime} c отметкой {mark}");
                     }
                 }
             }
@@ -963,6 +1044,36 @@ namespace drivingschool
                     int locationID = ((Location)locationID_schedule_comboBox.SelectedItem).LocationID;
                     int lessontypeID = ((LessonType)lessontypeID_schedule_comboBox.SelectedItem).LessonTypeID;
 
+                    // Проверяем, введена ли оценка
+                    int mark = -1; // Инициализируем переменную mark
+                    if (!string.IsNullOrWhiteSpace(mark_schedule_textBox.Text))
+                    {
+                        string input = mark_schedule_textBox.Text.Trim().ToLower();
+
+                        if (int.TryParse(input, out int parsedMark))
+                        {
+                            if (parsedMark < 0 || parsedMark > 10)
+                            {
+                                MessageBox.Show("Введите корректное значение для оценки от 0 до 10", "Ошибка");
+                                return;
+                            }
+                            mark = parsedMark;
+                        }
+                        else if (input == "сдан")
+                        {
+                            mark = 10; 
+                        }
+                        else if (input == "не сдан")
+                        {
+                            mark = 0; 
+                        }
+                        else
+                        {
+                            MessageBox.Show("Введите корректное значение для оценки (число от 0 до 10, \"Сдан\" или \"Не сдан\")", "Ошибка");
+                            return;
+                        }
+                    }
+
                     if (IsLessonOverlap_change(lessonDate, startTime, endTime, scheduleID))
                     {
                         MessageBox.Show($"Невозможно сохранить изменения. Промежуток времени {lessonDate.ToShortDateString()} с {startTime} по {endTime} занят.", "Ошибка");
@@ -970,7 +1081,7 @@ namespace drivingschool
                     }
 
                     SqlCommand updateScheduleCommand = new SqlCommand(
-                        "UPDATE [Schedule] SET LessonDate = @LessonDate, StartTime = @StartTime, EndTime = @EndTime, StudentID = @StudentID, LocationID = @LocationID, LessonTypeID = @LessonTypeID WHERE ScheduleID = @ScheduleID",
+                        "UPDATE [Schedule] SET LessonDate = @LessonDate, StartTime = @StartTime, EndTime = @EndTime, StudentID = @StudentID, LocationID = @LocationID, LessonTypeID = @LessonTypeID, Mark = @Mark WHERE ScheduleID = @ScheduleID",
                         sqlConnection);
 
                     updateScheduleCommand.Parameters.AddWithValue("@LessonDate", lessonDate);
@@ -979,6 +1090,7 @@ namespace drivingschool
                     updateScheduleCommand.Parameters.AddWithValue("@StudentID", studentID);
                     updateScheduleCommand.Parameters.AddWithValue("@LocationID", locationID);
                     updateScheduleCommand.Parameters.AddWithValue("@LessonTypeID", lessontypeID);
+                    updateScheduleCommand.Parameters.AddWithValue("@Mark", mark);
                     updateScheduleCommand.Parameters.AddWithValue("@ScheduleID", scheduleID);
 
                     int rowsAffected = updateScheduleCommand.ExecuteNonQuery();
