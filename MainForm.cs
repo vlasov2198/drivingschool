@@ -447,7 +447,6 @@ namespace drivingschool
 
             schedule_dataGridView.DataSource = dataSet.Tables[0];
 
-            // Установка заголовков столбцов
             schedule_dataGridView.Columns["ScheduleID"].HeaderText = "ID занятия";
             schedule_dataGridView.Columns["LessonDate"].HeaderText = "Дата занятия";
             schedule_dataGridView.Columns["StartTime"].HeaderText = "Время начала";
@@ -455,7 +454,7 @@ namespace drivingschool
             schedule_dataGridView.Columns["StudentName"].HeaderText = "Курсант";
             schedule_dataGridView.Columns["LocationName"].HeaderText = "Локация";
             schedule_dataGridView.Columns["LessonTypeName"].HeaderText = "Тип занятия";
-            schedule_dataGridView.Columns["Mark"].HeaderText = "Оценка"; // Добавленный столбец для оценок
+            schedule_dataGridView.Columns["Mark"].HeaderText = "Оценка";
         }
 
 
@@ -1249,6 +1248,8 @@ namespace drivingschool
                 adapter.Fill(dt);
 
                 students_dataGridView.DataSource = dt;
+
+                HighlightSearchResults(students_dataGridView, searchTerm);
             }
         }
 
@@ -1317,6 +1318,8 @@ namespace drivingschool
                 adapter.Fill(dt);
 
                 locations_dataGridView.DataSource = dt;
+
+                HighlightSearchResults(locations_dataGridView, searchTerm);
             }
         }
 
@@ -1390,8 +1393,42 @@ namespace drivingschool
                 adapter.Fill(dt);
 
                 lessontypes_dataGridView.DataSource = dt;
+
+                HighlightSearchResults(lessontypes_dataGridView, searchTerm);
+
             }
         }
+
+        private void HighlightSearchResults(DataGridView dataGridView, string searchTerm)
+        {
+            if (string.IsNullOrEmpty(searchTerm))
+            {
+                foreach (DataGridViewRow row in dataGridView.Rows)
+                {
+                    foreach (DataGridViewCell cell in row.Cells)
+                    {
+                        cell.Style.BackColor = dataGridView.DefaultCellStyle.BackColor;
+                    }
+                }
+                return;
+            }
+
+            foreach (DataGridViewRow row in dataGridView.Rows)
+            {
+                foreach (DataGridViewCell cell in row.Cells)
+                {
+                    if (cell.Value != null && cell.Value.ToString().Contains(searchTerm))
+                    {
+                        cell.Style.BackColor = Color.Yellow; 
+                    }
+                    else
+                    {
+                        cell.Style.BackColor = dataGridView.DefaultCellStyle.BackColor; 
+                    }
+                }
+            }
+        }
+
 
         private void changecolums_lessontypes_comboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
