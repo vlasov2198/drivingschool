@@ -10,6 +10,7 @@ using System.Windows.Forms;
 using System.Data.SqlClient;
 using System.Configuration;
 using System.Globalization;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace drivingschool
 {
@@ -29,7 +30,19 @@ namespace drivingschool
             sqlConnection.Open();
 
             Refreshdball();
+        }
 
+        private void FillColumnsStudentsComboBox()
+        {
+            changecolums_students_comboBox.Items.Clear();
+            changecolums_students_comboBox.Items.Add("Все столбцы");
+
+            foreach (DataGridViewColumn column in students_dataGridView.Columns)
+            {
+                changecolums_students_comboBox.Items.Add(column.HeaderText);
+            }
+
+            changecolums_students_comboBox.SelectedIndex = 0;
         }
 
         private void Refreshdball()
@@ -43,6 +56,9 @@ namespace drivingschool
             RefreshStudentComboBox();
             RefreshLocationComboBox();
             RefreshLessonTypeComboBox();
+
+
+            FillColumnsStudentsComboBox();
         }
 
         private void Refreshdbstudents()
@@ -54,7 +70,7 @@ namespace drivingschool
             dataAdapter.Fill(dataSet);
 
             students_dataGridView.DataSource = dataSet.Tables[0];
-
+            students_dataGridView.Columns["BirthDate"].HeaderText = "День рождения";
             students_dataGridView.Columns["StudentID"].HeaderText = "ID студента";
             students_dataGridView.Columns["FirstName"].HeaderText = "Имя";
             students_dataGridView.Columns["LastName"].HeaderText = "Фамилия";
@@ -117,7 +133,7 @@ namespace drivingschool
             schedule_dataGridView.Columns["StudentName"].HeaderText = "Курсант";
             schedule_dataGridView.Columns["LocationName"].HeaderText = "Локация";
             schedule_dataGridView.Columns["LessonTypeName"].HeaderText = "Тип занятия";
-            schedule_dataGridView.Columns["Mark"].HeaderText = "Оценка"; // Добавленный столбец для оценок
+            schedule_dataGridView.Columns["Mark"].HeaderText = "Оценка"; 
         }
 
         private void add_students_button_Click(object sender, EventArgs e)
@@ -335,7 +351,7 @@ namespace drivingschool
             command.Parameters.AddWithValue("@StudentID", studentID);
             command.Parameters.AddWithValue("@LocationID", locationID);
             command.Parameters.AddWithValue("@LessonTypeID", lessontypeID);
-            
+
             int rowsAffected = command.ExecuteNonQuery();
             if (rowsAffected == 1)
             {
@@ -511,7 +527,7 @@ namespace drivingschool
                 lastname_students_textBox.Text = lastName;
                 birthdate_students_textBox.Text = birthDate.ToString("dd.MM.yyyy");
                 phone_students_textBox.Text = phone;
-                info_students_textBox.Text =    $"Пройдено занятий: {studentLessons} из 25 ({percent:F2}%)." +
+                info_students_textBox.Text = $"Пройдено занятий: {studentLessons} из 25 ({percent:F2}%)." +
                                                 $"{Environment.NewLine}" +
                                                 $"{Environment.NewLine}Первое занятие в расписании: {firstLessonDate?.ToString("dd.MM.yyyy") ?? "нет данных в расписании"}" +
                                                 $"{Environment.NewLine}Последнее занятие в расписании: {lastLessonDate?.ToString("dd.MM.yyyy") ?? "нет данных в расписании"}" +
@@ -520,7 +536,7 @@ namespace drivingschool
                                                 $"{Environment.NewLine}Средний балл: {averageMark:F2}" +
                                                 $"{Environment.NewLine}" +
                                                 $"{Environment.NewLine}Количество несданных занятий: {zeroMarks}";
-            
+
                 add_students_button.Enabled = false;
             }
             else
@@ -1044,8 +1060,7 @@ namespace drivingschool
                     int locationID = ((Location)locationID_schedule_comboBox.SelectedItem).LocationID;
                     int lessontypeID = ((LessonType)lessontypeID_schedule_comboBox.SelectedItem).LessonTypeID;
 
-                    // Проверяем, введена ли оценка
-                    int mark = -1; // Инициализируем переменную mark
+                    int mark = -1;
                     if (!string.IsNullOrWhiteSpace(mark_schedule_textBox.Text))
                     {
                         string input = mark_schedule_textBox.Text.Trim().ToLower();
@@ -1061,11 +1076,11 @@ namespace drivingschool
                         }
                         else if (input == "сдан")
                         {
-                            mark = 10; 
+                            mark = 10;
                         }
                         else if (input == "не сдан")
                         {
-                            mark = 0; 
+                            mark = 0;
                         }
                         else
                         {
@@ -1136,5 +1151,83 @@ namespace drivingschool
             int count = (int)command.ExecuteScalar();
             return count > 0;
         }
+
+        private void search_students_button_Click(object sender, EventArgs e)
+        {
+        }
+
+        Dictionary<string, string> StudentscolumnTranslations = new Dictionary<string, string>
+{
+            { "ID студента", "StudentID" },
+            { "Имя", "FirstName" },
+            { "Фамилия", "LastName" },
+            { "День рождения", "BirthDate" },
+            { "Телефон", "Phone" }
+           };
+
+        private void search_students_textBox_TextChanged(object sender, EventArgs e)
+        {
+            Searchstudents();
+        }
+
+        private void Searchstudents()
+        {
+            string selectedColumn = changecolums_students_comboBox.SelectedItem?.ToString();
+            string searchTerm = search_students_textBox.Text.Trim();
+
+            if (!string.IsNullOrEmpty(selectedColumn) && selectedColumn != "Все столбцы")
+            {
+                string englishColumnName = StudentscolumnTranslations[selectedColumn];
+
+                string searchQuery = $"SELECT * FROM [Students] WHERE [{englishColumnName}] LIKE @SearchTerm";
+
+                if (students_dataGridView.Columns[englishColumnName].ValueType == typeof(DateTime))
+                {
+                    searchQuery = $"SELECT * FROM [Students] WHERE CONVERT(varchar, [{englishColumnName}], 104) LIKE @SearchTerm";
+                }
+
+                SqlCommand searchStudentsCommand = new SqlCommand(searchQuery, sqlConnection);
+                searchStudentsCommand.Parameters.AddWithValue("@SearchTerm", $"%{searchTerm}%");
+
+                SqlDataAdapter adapter = new SqlDataAdapter(searchStudentsCommand);
+                DataTable dt = new DataTable();
+                adapter.Fill(dt);
+
+                students_dataGridView.DataSource = dt;
+            }
+            else
+            {
+                string searchQuery = "SELECT * FROM [Students] WHERE ";
+                foreach (DataGridViewColumn column in students_dataGridView.Columns)
+                {
+                    string englishColumnName = StudentscolumnTranslations[column.HeaderText];
+
+                    if (column.ValueType == typeof(DateTime))
+                    {
+                        searchQuery += $"CONVERT(varchar, [{englishColumnName}], 104) LIKE @SearchTerm OR ";
+                    }
+                    else
+                    {
+                        searchQuery += $"[{englishColumnName}] LIKE @SearchTerm OR ";
+                    }
+                }
+                searchQuery = searchQuery.TrimEnd("OR ".ToCharArray());
+
+                SqlCommand searchStudentsCommand = new SqlCommand(searchQuery, sqlConnection);
+                searchStudentsCommand.Parameters.AddWithValue("@SearchTerm", $"%{searchTerm}%");
+
+                SqlDataAdapter adapter = new SqlDataAdapter(searchStudentsCommand);
+                DataTable dt = new DataTable();
+                adapter.Fill(dt);
+
+                students_dataGridView.DataSource = dt;
+            }
+        }
+
+        private void changecolums_students_comboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Searchstudents();
+        }
     }
 }
+
