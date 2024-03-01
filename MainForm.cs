@@ -32,18 +32,6 @@ namespace drivingschool
             Refreshdball();
         }
 
-        private void FillColumnsStudentsComboBox()
-        {
-            changecolums_students_comboBox.Items.Clear();
-            changecolums_students_comboBox.Items.Add("Все столбцы");
-
-            foreach (DataGridViewColumn column in students_dataGridView.Columns)
-            {
-                changecolums_students_comboBox.Items.Add(column.HeaderText);
-            }
-
-            changecolums_students_comboBox.SelectedIndex = 0;
-        }
 
         private void Refreshdball()
         {
@@ -59,6 +47,49 @@ namespace drivingschool
 
 
             FillColumnsStudentsComboBox();
+            FillColumnsLocationsComboBox();
+            FillColumnsLessonTypesComboBox();
+        }
+
+
+        private void FillColumnsStudentsComboBox()
+        {
+            changecolums_students_comboBox.Items.Clear();
+            changecolums_students_comboBox.Items.Add("Все столбцы");
+
+            foreach (DataGridViewColumn column in students_dataGridView.Columns)
+            {
+                changecolums_students_comboBox.Items.Add(column.HeaderText);
+            }
+
+            changecolums_students_comboBox.SelectedIndex = 0;
+        }
+
+        private void FillColumnsLocationsComboBox()
+        {
+            changecolums_locations_comboBox.Items.Clear();
+            changecolums_locations_comboBox.Items.Add("Все столбцы");
+
+            foreach (DataGridViewColumn column in locations_dataGridView.Columns)
+            {
+                changecolums_locations_comboBox.Items.Add(column.HeaderText);
+            }
+
+            changecolums_locations_comboBox.SelectedIndex = 0;
+        }
+
+
+        private void FillColumnsLessonTypesComboBox()
+        {
+            changecolums_lessontypes_comboBox.Items.Clear();
+            changecolums_lessontypes_comboBox.Items.Add("Все столбцы");
+
+            foreach (DataGridViewColumn column in lessontypes_dataGridView.Columns)
+            {
+                changecolums_lessontypes_comboBox.Items.Add(column.HeaderText);
+            }
+
+            changecolums_lessontypes_comboBox.SelectedIndex = 0;
         }
 
         private void Refreshdbstudents()
@@ -89,6 +120,7 @@ namespace drivingschool
             locations_dataGridView.DataSource = dataSet.Tables[0];
 
             locations_dataGridView.Columns["LocationID"].HeaderText = "ID локации";
+            locations_dataGridView.Columns["Name"].HeaderText = "Название";
             locations_dataGridView.Columns["Address"].HeaderText = "Адрес";
             locations_dataGridView.Columns["Description"].HeaderText = "Дополнительная информация";
         }
@@ -1152,10 +1184,6 @@ namespace drivingschool
             return count > 0;
         }
 
-        private void search_students_button_Click(object sender, EventArgs e)
-        {
-        }
-
         Dictionary<string, string> StudentscolumnTranslations = new Dictionary<string, string>
 {
             { "ID студента", "StudentID" },
@@ -1228,6 +1256,152 @@ namespace drivingschool
         {
             Searchstudents();
         }
-    }
-}
 
+        Dictionary<string, string> LocationsColumnTranslations = new Dictionary<string, string>
+        {
+            { "ID локации", "LocationID" },
+            { "Название", "Name" },
+            { "Адрес", "Address" },
+            { "Дополнительная информация", "Description" },
+        };
+
+
+        private void SearchLocations()
+        {
+            string selectedColumn = changecolums_locations_comboBox.SelectedItem?.ToString();
+            string searchTerm = search_locations_textBox.Text.Trim();
+
+            if (!string.IsNullOrEmpty(selectedColumn) && selectedColumn != "Все столбцы")
+            {
+                string englishColumnName = LocationsColumnTranslations[selectedColumn];
+
+                string searchQuery = $"SELECT * FROM [Locations] WHERE [{englishColumnName}] LIKE @SearchTerm";
+
+                if (locations_dataGridView.Columns[englishColumnName].ValueType == typeof(DateTime))
+                {
+                    searchQuery = $"SELECT * FROM [Locations] WHERE CONVERT(varchar, [{englishColumnName}], 104) LIKE @SearchTerm";
+                }
+
+                SqlCommand searchLocationsCommand = new SqlCommand(searchQuery, sqlConnection);
+                searchLocationsCommand.Parameters.AddWithValue("@SearchTerm", $"%{searchTerm}%");
+
+                SqlDataAdapter adapter = new SqlDataAdapter(searchLocationsCommand);
+                DataTable dt = new DataTable();
+                adapter.Fill(dt);
+
+                locations_dataGridView.DataSource = dt;
+            }
+            else
+            {
+                string searchQuery = "SELECT * FROM [Locations] WHERE ";
+                foreach (DataGridViewColumn column in locations_dataGridView.Columns)
+                {
+                    string englishColumnName = LocationsColumnTranslations[column.HeaderText];
+
+                    if (column.ValueType == typeof(DateTime))
+                    {
+                        searchQuery += $"CONVERT(varchar, [{englishColumnName}], 104) LIKE @SearchTerm OR ";
+                    }
+                    else
+                    {
+                        searchQuery += $"[{englishColumnName}] LIKE @SearchTerm OR ";
+                    }
+                }
+                searchQuery = searchQuery.TrimEnd("OR ".ToCharArray());
+
+                SqlCommand searchLocationsCommand = new SqlCommand(searchQuery, sqlConnection);
+                searchLocationsCommand.Parameters.AddWithValue("@SearchTerm", $"%{searchTerm}%");
+
+                SqlDataAdapter adapter = new SqlDataAdapter(searchLocationsCommand);
+                DataTable dt = new DataTable();
+                adapter.Fill(dt);
+
+                locations_dataGridView.DataSource = dt;
+            }
+        }
+
+        private void search_locations_textBox_TextChanged(object sender, EventArgs e)
+        {
+            SearchLocations();
+        }
+
+        private void changecolums_locations_comboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            SearchLocations();
+        }
+
+        Dictionary<string, string> LessonTypesColumnTranslations = new Dictionary<string, string>
+        {
+        { "ID типа занятия", "LessonTypeID" },
+        { "Именование", "Name" },
+        { "Описание", "Description" },
+        { "Заметка инструктора", "InstructorNotes" }
+        };
+
+
+        private void SearchLessonTypes()
+        {
+            string selectedColumn = changecolums_lessontypes_comboBox.SelectedItem?.ToString();
+            string searchTerm = search_lessontypes_textBox.Text.Trim();
+
+            if (!string.IsNullOrEmpty(selectedColumn) && selectedColumn != "Все столбцы")
+            {
+                string englishColumnName = LessonTypesColumnTranslations[selectedColumn];
+
+                string searchQuery = $"SELECT * FROM [LessonTypes] WHERE [{englishColumnName}] LIKE @SearchTerm";
+
+                if (lessontypes_dataGridView.Columns[englishColumnName].ValueType == typeof(DateTime))
+                {
+                    searchQuery = $"SELECT * FROM [LessonTypes] WHERE CONVERT(varchar, [{englishColumnName}], 104) LIKE @SearchTerm";
+                }
+
+                SqlCommand searchLessonTypesCommand = new SqlCommand(searchQuery, sqlConnection);
+                searchLessonTypesCommand.Parameters.AddWithValue("@SearchTerm", $"%{searchTerm}%");
+
+                SqlDataAdapter adapter = new SqlDataAdapter(searchLessonTypesCommand);
+                DataTable dt = new DataTable();
+                adapter.Fill(dt);
+
+                lessontypes_dataGridView.DataSource = dt;
+            }
+            else
+            {
+                string searchQuery = "SELECT * FROM [LessonTypes] WHERE ";
+                foreach (DataGridViewColumn column in lessontypes_dataGridView.Columns)
+                {
+                    string englishColumnName = LessonTypesColumnTranslations[column.HeaderText];
+
+                    if (column.ValueType == typeof(DateTime))
+                    {
+                        searchQuery += $"CONVERT(varchar, [{englishColumnName}], 104) LIKE @SearchTerm OR ";
+                    }
+                    else
+                    {
+                        searchQuery += $"[{englishColumnName}] LIKE @SearchTerm OR ";
+                    }
+                }
+                searchQuery = searchQuery.TrimEnd("OR ".ToCharArray());
+
+                SqlCommand searchLessonTypesCommand = new SqlCommand(searchQuery, sqlConnection);
+                searchLessonTypesCommand.Parameters.AddWithValue("@SearchTerm", $"%{searchTerm}%");
+
+                SqlDataAdapter adapter = new SqlDataAdapter(searchLessonTypesCommand);
+                DataTable dt = new DataTable();
+                adapter.Fill(dt);
+
+                lessontypes_dataGridView.DataSource = dt;
+            }
+        }
+
+        private void changecolums_lessontypes_comboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            SearchLessonTypes();
+        }
+
+        private void search_lessontypes_textBox_TextChanged(object sender, EventArgs e)
+        {
+            SearchLessonTypes();
+        }
+    }
+
+}

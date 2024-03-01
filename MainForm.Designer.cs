@@ -478,6 +478,7 @@
             // 
             // comboBox2
             // 
+            this.comboBox2.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox2.FormattingEnabled = true;
             this.comboBox2.Location = new System.Drawing.Point(552, 48);
             this.comboBox2.Name = "comboBox2";
@@ -636,11 +637,13 @@
             // 
             // changecolums_locations_comboBox
             // 
+            this.changecolums_locations_comboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.changecolums_locations_comboBox.FormattingEnabled = true;
             this.changecolums_locations_comboBox.Location = new System.Drawing.Point(552, 48);
             this.changecolums_locations_comboBox.Name = "changecolums_locations_comboBox";
             this.changecolums_locations_comboBox.Size = new System.Drawing.Size(245, 32);
             this.changecolums_locations_comboBox.TabIndex = 37;
+            this.changecolums_locations_comboBox.SelectedIndexChanged += new System.EventHandler(this.changecolums_locations_comboBox_SelectedIndexChanged);
             // 
             // search_locations_textBox
             // 
@@ -648,6 +651,7 @@
             this.search_locations_textBox.Name = "search_locations_textBox";
             this.search_locations_textBox.Size = new System.Drawing.Size(259, 29);
             this.search_locations_textBox.TabIndex = 35;
+            this.search_locations_textBox.TextChanged += new System.EventHandler(this.search_locations_textBox_TextChanged);
             // 
             // label26
             // 
@@ -771,11 +775,13 @@
             // 
             // changecolums_lessontypes_comboBox
             // 
+            this.changecolums_lessontypes_comboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.changecolums_lessontypes_comboBox.FormattingEnabled = true;
             this.changecolums_lessontypes_comboBox.Location = new System.Drawing.Point(552, 48);
             this.changecolums_lessontypes_comboBox.Name = "changecolums_lessontypes_comboBox";
             this.changecolums_lessontypes_comboBox.Size = new System.Drawing.Size(245, 32);
             this.changecolums_lessontypes_comboBox.TabIndex = 37;
+            this.changecolums_lessontypes_comboBox.SelectedIndexChanged += new System.EventHandler(this.changecolums_lessontypes_comboBox_SelectedIndexChanged);
             // 
             // search_lessontypes_textBox
             // 
@@ -783,6 +789,7 @@
             this.search_lessontypes_textBox.Name = "search_lessontypes_textBox";
             this.search_lessontypes_textBox.Size = new System.Drawing.Size(259, 29);
             this.search_lessontypes_textBox.TabIndex = 35;
+            this.search_lessontypes_textBox.TextChanged += new System.EventHandler(this.search_lessontypes_textBox_TextChanged);
             // 
             // label34
             // 
