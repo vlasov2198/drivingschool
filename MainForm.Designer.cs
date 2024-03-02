@@ -108,12 +108,12 @@
             this.schedule_reportViewer = new Microsoft.Reporting.WinForms.ReportViewer();
             this.label6 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
-            this.comboBox1 = new System.Windows.Forms.ComboBox();
-            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.changecolums_students_report_comboBox = new System.Windows.Forms.ComboBox();
+            this.search_students_report_textBox = new System.Windows.Forms.TextBox();
             this.label12 = new System.Windows.Forms.Label();
             this.label21 = new System.Windows.Forms.Label();
-            this.comboBox2 = new System.Windows.Forms.ComboBox();
-            this.textBox2 = new System.Windows.Forms.TextBox();
+            this.changecolums_schedule_report_comboBox = new System.Windows.Forms.ComboBox();
+            this.search_schedule_report_textBox = new System.Windows.Forms.TextBox();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.students_dataGridView)).BeginInit();
@@ -908,8 +908,8 @@
             // 
             this.tabPage5.Controls.Add(this.label6);
             this.tabPage5.Controls.Add(this.label7);
-            this.tabPage5.Controls.Add(this.comboBox1);
-            this.tabPage5.Controls.Add(this.textBox1);
+            this.tabPage5.Controls.Add(this.changecolums_students_report_comboBox);
+            this.tabPage5.Controls.Add(this.search_students_report_textBox);
             this.tabPage5.Controls.Add(this.students_reportViewer);
             this.tabPage5.Location = new System.Drawing.Point(4, 33);
             this.tabPage5.Name = "tabPage5";
@@ -931,8 +931,8 @@
             // 
             this.tabPage6.Controls.Add(this.label12);
             this.tabPage6.Controls.Add(this.label21);
-            this.tabPage6.Controls.Add(this.comboBox2);
-            this.tabPage6.Controls.Add(this.textBox2);
+            this.tabPage6.Controls.Add(this.changecolums_schedule_report_comboBox);
+            this.tabPage6.Controls.Add(this.search_schedule_report_textBox);
             this.tabPage6.Controls.Add(this.schedule_reportViewer);
             this.tabPage6.Location = new System.Drawing.Point(4, 33);
             this.tabPage6.Name = "tabPage6";
@@ -948,6 +948,7 @@
             this.schedule_reportViewer.ServerReport.BearerToken = null;
             this.schedule_reportViewer.Size = new System.Drawing.Size(1226, 558);
             this.schedule_reportViewer.TabIndex = 1;
+            this.schedule_reportViewer.Load += new System.EventHandler(this.schedule_reportViewer_Load);
             // 
             // label6
             // 
@@ -969,21 +970,23 @@
             this.label7.TabIndex = 25;
             this.label7.Text = "Значение для поиска";
             // 
-            // comboBox1
+            // changecolums_students_report_comboBox
             // 
-            this.comboBox1.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Location = new System.Drawing.Point(572, 48);
-            this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(245, 32);
-            this.comboBox1.TabIndex = 24;
+            this.changecolums_students_report_comboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.changecolums_students_report_comboBox.FormattingEnabled = true;
+            this.changecolums_students_report_comboBox.Location = new System.Drawing.Point(572, 48);
+            this.changecolums_students_report_comboBox.Name = "changecolums_students_report_comboBox";
+            this.changecolums_students_report_comboBox.Size = new System.Drawing.Size(245, 32);
+            this.changecolums_students_report_comboBox.TabIndex = 24;
+            this.changecolums_students_report_comboBox.SelectedIndexChanged += new System.EventHandler(this.changecolums_students_report_comboBox_SelectedIndexChanged);
             // 
-            // textBox1
+            // search_students_report_textBox
             // 
-            this.textBox1.Location = new System.Drawing.Point(959, 48);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(259, 29);
-            this.textBox1.TabIndex = 23;
+            this.search_students_report_textBox.Location = new System.Drawing.Point(959, 48);
+            this.search_students_report_textBox.Name = "search_students_report_textBox";
+            this.search_students_report_textBox.Size = new System.Drawing.Size(259, 29);
+            this.search_students_report_textBox.TabIndex = 23;
+            this.search_students_report_textBox.TextChanged += new System.EventHandler(this.search_students_report_textBox_TextChanged);
             // 
             // label12
             // 
@@ -1005,21 +1008,23 @@
             this.label21.TabIndex = 25;
             this.label21.Text = "Значение для поиска";
             // 
-            // comboBox2
+            // changecolums_schedule_report_comboBox
             // 
-            this.comboBox2.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.comboBox2.FormattingEnabled = true;
-            this.comboBox2.Location = new System.Drawing.Point(572, 47);
-            this.comboBox2.Name = "comboBox2";
-            this.comboBox2.Size = new System.Drawing.Size(245, 32);
-            this.comboBox2.TabIndex = 24;
+            this.changecolums_schedule_report_comboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.changecolums_schedule_report_comboBox.FormattingEnabled = true;
+            this.changecolums_schedule_report_comboBox.Location = new System.Drawing.Point(572, 47);
+            this.changecolums_schedule_report_comboBox.Name = "changecolums_schedule_report_comboBox";
+            this.changecolums_schedule_report_comboBox.Size = new System.Drawing.Size(245, 32);
+            this.changecolums_schedule_report_comboBox.TabIndex = 24;
+            this.changecolums_schedule_report_comboBox.SelectedIndexChanged += new System.EventHandler(this.changecolums_schedule_report_comboBox_SelectedIndexChanged);
             // 
-            // textBox2
+            // search_schedule_report_textBox
             // 
-            this.textBox2.Location = new System.Drawing.Point(959, 47);
-            this.textBox2.Name = "textBox2";
-            this.textBox2.Size = new System.Drawing.Size(259, 29);
-            this.textBox2.TabIndex = 23;
+            this.search_schedule_report_textBox.Location = new System.Drawing.Point(959, 47);
+            this.search_schedule_report_textBox.Name = "search_schedule_report_textBox";
+            this.search_schedule_report_textBox.Size = new System.Drawing.Size(259, 29);
+            this.search_schedule_report_textBox.TabIndex = 23;
+            this.search_schedule_report_textBox.TextChanged += new System.EventHandler(this.search_schedule_report_textBox_TextChanged);
             // 
             // MainForm
             // 
@@ -1138,12 +1143,12 @@
         private Microsoft.Reporting.WinForms.ReportViewer schedule_reportViewer;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.ComboBox comboBox1;
-        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.ComboBox changecolums_students_report_comboBox;
+        private System.Windows.Forms.TextBox search_students_report_textBox;
         private System.Windows.Forms.Label label12;
         private System.Windows.Forms.Label label21;
-        private System.Windows.Forms.ComboBox comboBox2;
-        private System.Windows.Forms.TextBox textBox2;
+        private System.Windows.Forms.ComboBox changecolums_schedule_report_comboBox;
+        private System.Windows.Forms.TextBox search_schedule_report_textBox;
     }
 }
 

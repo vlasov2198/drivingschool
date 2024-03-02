@@ -69,6 +69,16 @@ namespace drivingschool
             }
 
             changecolums_students_comboBox.SelectedIndex = 0;
+
+            changecolums_students_report_comboBox.Items.Clear();
+            changecolums_students_report_comboBox.Items.Add("Все столбцы");
+
+            foreach (DataGridViewColumn column in students_dataGridView.Columns)
+            {
+                changecolums_students_report_comboBox.Items.Add(column.HeaderText);
+            }
+
+            changecolums_students_report_comboBox.SelectedIndex = 0;
         }
 
         private void FillColumnsLocationsComboBox()
@@ -109,6 +119,16 @@ namespace drivingschool
             }
 
             changecolums_schedule_comboBox.SelectedIndex = 0;
+
+            changecolums_schedule_report_comboBox.Items.Clear();
+            changecolums_schedule_report_comboBox.Items.Add("Все столбцы");
+
+            foreach (DataGridViewColumn column in schedule_dataGridView.Columns)
+            {
+                changecolums_schedule_report_comboBox.Items.Add(column.HeaderText);
+            }
+
+            changecolums_schedule_report_comboBox.SelectedIndex = 0;
         }
 
         private void Refreshdbstudents()
@@ -230,6 +250,7 @@ namespace drivingschool
             }
             Refreshdbstudents();
             RefreshStudentComboBox();
+            UpdateReportStudents();
         }
 
         private void add_locations_button_Click(object sender, EventArgs e)
@@ -768,6 +789,7 @@ namespace drivingschool
                 MessageBox.Show(deletedStudentsMessage, "Успех");
                 RefreshStudentComboBox();
                 Refreshdbstudents();
+                UpdateReportStudents();
             }
             else
             {
@@ -998,6 +1020,7 @@ namespace drivingschool
                     MessageBox.Show("Изменения успешно сохранены в базе данных", "Успех");
                     Refreshdbstudents();
                     RefreshStudentComboBox();
+                    UpdateReportStudents();
                 }
                 else
                 {
@@ -1565,12 +1588,45 @@ namespace drivingschool
         private void students_reportViewer_Load(object sender, EventArgs e)
         {
             UpdateReportStudents();
-            UpdateReportSchedule();
         }
 
         private void UpdateReportStudents()
         {
-            SqlCommand command = new SqlCommand("Select * from Students", sqlConnection);
+            string selectedColumn = changecolums_students_report_comboBox.SelectedItem?.ToString();
+            string searchTerm = search_students_report_textBox.Text.Trim();
+
+            string searchQuery = $"SELECT * FROM Students";
+
+            if (!string.IsNullOrEmpty(selectedColumn) && selectedColumn != "Все столбцы")
+            {
+                string englishColumnName = StudentscolumnTranslations[selectedColumn];
+                searchQuery += $" WHERE [{englishColumnName}] LIKE @SearchTerm";
+
+                if (students_dataGridView.Columns[englishColumnName].ValueType == typeof(DateTime))
+                {
+                    searchQuery = $"SELECT * FROM Students WHERE CONVERT(varchar, [{englishColumnName}], 104) LIKE @SearchTerm";
+                }
+            }
+            else if (!string.IsNullOrEmpty(searchTerm))
+            {
+                searchQuery += " WHERE ";
+                foreach (string columnName in StudentscolumnTranslations.Values)
+                {
+                    if (students_dataGridView.Columns[columnName].ValueType == typeof(DateTime))
+                    {
+                        searchQuery += $"CONVERT(varchar, [{columnName}], 104) LIKE @SearchTerm OR ";
+                    }
+                    else
+                    {
+                        searchQuery += $"[{columnName}] LIKE @SearchTerm OR ";
+                    }
+                }
+                searchQuery = searchQuery.TrimEnd(" OR ".ToCharArray());
+            }
+
+            SqlCommand command = new SqlCommand(searchQuery, sqlConnection);
+            command.Parameters.AddWithValue("@SearchTerm", $"%{searchTerm}%");
+
             SqlDataAdapter d = new SqlDataAdapter(command);
             DataTable dt = new DataTable();
             d.Fill(dt);
@@ -1582,9 +1638,67 @@ namespace drivingschool
             students_reportViewer.RefreshReport();
         }
 
+
+
         private void UpdateReportSchedule()
         {
-            SqlCommand command = new SqlCommand("Select * from Schedule", sqlConnection);
+            string selectedColumn = changecolums_schedule_comboBox.SelectedItem?.ToString();
+            string searchTerm = search_schedule_report_textBox.Text.Trim();
+
+            string searchQuery = "SELECT s.ScheduleID, s.LessonDate, s.StartTime, s.EndTime, " +
+                                 "st.FirstName + ' ' + st.LastName AS StudentName, " +
+                                 "st.StudentID, " +
+                                 "l.Name AS LocationName, " +
+                                 "l.LocationID, " +
+                                 "lt.Name AS LessonTypeName, " +
+                                 "lt.LessonTypeID, " +
+                                 "s.Mark " +
+                                 "FROM Schedule s " +
+                                 "JOIN Students st ON s.StudentID = st.StudentID " +
+                                 "JOIN Locations l ON s.LocationID = l.LocationID " +
+                                 "JOIN LessonTypes lt ON s.LessonTypeID = lt.LessonTypeID ";
+
+            if (!string.IsNullOrEmpty(selectedColumn) && selectedColumn != "Все столбцы")
+            {
+                string englishColumnName = ScheduleColumnTranslations[selectedColumn];
+
+                if (englishColumnName == "StudentID")
+                {
+                    searchQuery += $"WHERE st.FirstName + ' ' + st.LastName LIKE @SearchTerm";
+                }
+                else if (englishColumnName == "LocationID")
+                {
+                    searchQuery += $"WHERE l.Name LIKE @SearchTerm";
+                }
+                else if (englishColumnName == "LessonTypeID")
+                {
+                    searchQuery += $"WHERE lt.Name LIKE @SearchTerm";
+                }
+                else if (englishColumnName == "LessonDate")
+                {
+                    // Предположим, что формат даты в вашей базе данных - "dd.MM.yyyy"
+                    searchQuery += $"WHERE CONVERT(varchar, s.LessonDate, 104) LIKE @SearchTerm";
+                }
+                else
+                {
+                    searchQuery += $"WHERE s.[{englishColumnName}] LIKE @SearchTerm";
+                }
+            }
+            else
+            {
+                searchQuery += "WHERE s.ScheduleID LIKE @SearchTerm OR " +
+                               "CONVERT(varchar, s.LessonDate, 104) LIKE @SearchTerm OR " +
+                               "s.StartTime LIKE @SearchTerm OR " +
+                               "s.EndTime LIKE @SearchTerm OR " +
+                               "st.FirstName + ' ' + st.LastName LIKE @SearchTerm OR " +
+                               "l.Name LIKE @SearchTerm OR " +
+                               "lt.Name LIKE @SearchTerm OR " +
+                               "s.Mark LIKE @SearchTerm";
+            }
+
+            SqlCommand command = new SqlCommand(searchQuery, sqlConnection);
+            command.Parameters.AddWithValue("@SearchTerm", $"%{searchTerm}%");
+
             SqlDataAdapter d = new SqlDataAdapter(command);
             DataTable dt = new DataTable();
             d.Fill(dt);
@@ -1594,6 +1708,32 @@ namespace drivingschool
             schedule_reportViewer.LocalReport.ReportPath = "Report_schedule.rdlc";
             schedule_reportViewer.LocalReport.DataSources.Add(sourse);
             schedule_reportViewer.RefreshReport();
+        }
+
+
+        private void search_students_report_textBox_TextChanged(object sender, EventArgs e)
+        {
+            UpdateReportStudents();
+        }
+
+        private void changecolums_students_report_comboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            UpdateReportStudents();
+        }
+
+        private void schedule_reportViewer_Load(object sender, EventArgs e)
+        {
+            UpdateReportSchedule();
+        }
+
+        private void changecolums_schedule_report_comboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            UpdateReportSchedule();
+        }
+
+        private void search_schedule_report_textBox_TextChanged(object sender, EventArgs e)
+        {
+            UpdateReportSchedule();
         }
     }
 }
