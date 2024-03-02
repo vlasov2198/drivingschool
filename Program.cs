@@ -14,8 +14,18 @@ namespace drivingschool
         [STAThread]
         static void Main()
         {
+
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+            Screensaver first = new Screensaver();
+            DateTime end = DateTime.Now + TimeSpan.FromSeconds(6);
+            first.Show();
+            while(end > DateTime.Now)
+            {
+                Application.DoEvents();
+            }
+            first.Close();
+            first.Dispose();
             Application.Run(new MainForm());
         }
     }
