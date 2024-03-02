@@ -48,9 +48,9 @@
             this.firstname_students_textBox = new System.Windows.Forms.TextBox();
             this.students_dataGridView = new System.Windows.Forms.DataGridView();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.allschedule_checkbox = new System.Windows.Forms.CheckBox();
             this.mark_schedule_label = new System.Windows.Forms.Label();
             this.mark_schedule_textBox = new System.Windows.Forms.TextBox();
-            this.allschedule_button = new System.Windows.Forms.Button();
             this.change_lessondate_scheduledateTimePicker = new System.Windows.Forms.DateTimePicker();
             this.endtime_schedule_comboBox = new System.Windows.Forms.ComboBox();
             this.starttime_schedule_comboBox = new System.Windows.Forms.ComboBox();
@@ -102,6 +102,18 @@
             this.description_lessontypes_textBox = new System.Windows.Forms.TextBox();
             this.name_lessontypes_textBox = new System.Windows.Forms.TextBox();
             this.lessontypes_dataGridView = new System.Windows.Forms.DataGridView();
+            this.tabPage5 = new System.Windows.Forms.TabPage();
+            this.students_reportViewer = new Microsoft.Reporting.WinForms.ReportViewer();
+            this.tabPage6 = new System.Windows.Forms.TabPage();
+            this.schedule_reportViewer = new Microsoft.Reporting.WinForms.ReportViewer();
+            this.label6 = new System.Windows.Forms.Label();
+            this.label7 = new System.Windows.Forms.Label();
+            this.comboBox1 = new System.Windows.Forms.ComboBox();
+            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.label12 = new System.Windows.Forms.Label();
+            this.label21 = new System.Windows.Forms.Label();
+            this.comboBox2 = new System.Windows.Forms.ComboBox();
+            this.textBox2 = new System.Windows.Forms.TextBox();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.students_dataGridView)).BeginInit();
@@ -111,6 +123,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.locations_dataGridView)).BeginInit();
             this.tabPage4.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.lessontypes_dataGridView)).BeginInit();
+            this.tabPage5.SuspendLayout();
+            this.tabPage6.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControl1
@@ -119,6 +133,8 @@
             this.tabControl1.Controls.Add(this.tabPage2);
             this.tabControl1.Controls.Add(this.tabPage3);
             this.tabControl1.Controls.Add(this.tabPage4);
+            this.tabControl1.Controls.Add(this.tabPage5);
+            this.tabControl1.Controls.Add(this.tabPage6);
             this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl1.Location = new System.Drawing.Point(0, 0);
             this.tabControl1.Margin = new System.Windows.Forms.Padding(6);
@@ -316,9 +332,9 @@
             // 
             // tabPage2
             // 
+            this.tabPage2.Controls.Add(this.allschedule_checkbox);
             this.tabPage2.Controls.Add(this.mark_schedule_label);
             this.tabPage2.Controls.Add(this.mark_schedule_textBox);
-            this.tabPage2.Controls.Add(this.allschedule_button);
             this.tabPage2.Controls.Add(this.change_lessondate_scheduledateTimePicker);
             this.tabPage2.Controls.Add(this.endtime_schedule_comboBox);
             this.tabPage2.Controls.Add(this.starttime_schedule_comboBox);
@@ -349,6 +365,17 @@
             this.tabPage2.Text = "Расписание";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
+            // allschedule_checkbox
+            // 
+            this.allschedule_checkbox.AutoSize = true;
+            this.allschedule_checkbox.Location = new System.Drawing.Point(779, 106);
+            this.allschedule_checkbox.Name = "allschedule_checkbox";
+            this.allschedule_checkbox.Size = new System.Drawing.Size(128, 28);
+            this.allschedule_checkbox.TabIndex = 56;
+            this.allschedule_checkbox.Text = "За все дни";
+            this.allschedule_checkbox.UseVisualStyleBackColor = true;
+            this.allschedule_checkbox.CheckedChanged += new System.EventHandler(this.allschedule_checkbox_CheckedChanged);
+            // 
             // mark_schedule_label
             // 
             this.mark_schedule_label.AutoSize = true;
@@ -367,16 +394,6 @@
             this.mark_schedule_textBox.Size = new System.Drawing.Size(245, 29);
             this.mark_schedule_textBox.TabIndex = 54;
             this.mark_schedule_textBox.Visible = false;
-            // 
-            // allschedule_button
-            // 
-            this.allschedule_button.Location = new System.Drawing.Point(779, 93);
-            this.allschedule_button.Name = "allschedule_button";
-            this.allschedule_button.Size = new System.Drawing.Size(167, 49);
-            this.allschedule_button.TabIndex = 53;
-            this.allschedule_button.Text = "За все дни";
-            this.allschedule_button.UseVisualStyleBackColor = true;
-            this.allschedule_button.Click += new System.EventHandler(this.allschedule_button_Click);
             // 
             // change_lessondate_scheduledateTimePicker
             // 
@@ -887,6 +904,123 @@
             this.lessontypes_dataGridView.TabIndex = 23;
             this.lessontypes_dataGridView.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.lessontypes_dataGridView_CellClick);
             // 
+            // tabPage5
+            // 
+            this.tabPage5.Controls.Add(this.label6);
+            this.tabPage5.Controls.Add(this.label7);
+            this.tabPage5.Controls.Add(this.comboBox1);
+            this.tabPage5.Controls.Add(this.textBox1);
+            this.tabPage5.Controls.Add(this.students_reportViewer);
+            this.tabPage5.Location = new System.Drawing.Point(4, 33);
+            this.tabPage5.Name = "tabPage5";
+            this.tabPage5.Size = new System.Drawing.Size(1226, 644);
+            this.tabPage5.TabIndex = 4;
+            this.tabPage5.Text = "Отчет по курсантам";
+            this.tabPage5.UseVisualStyleBackColor = true;
+            // 
+            // students_reportViewer
+            // 
+            this.students_reportViewer.Location = new System.Drawing.Point(0, 86);
+            this.students_reportViewer.Name = "students_reportViewer";
+            this.students_reportViewer.ServerReport.BearerToken = null;
+            this.students_reportViewer.Size = new System.Drawing.Size(1226, 558);
+            this.students_reportViewer.TabIndex = 0;
+            this.students_reportViewer.Load += new System.EventHandler(this.students_reportViewer_Load);
+            // 
+            // tabPage6
+            // 
+            this.tabPage6.Controls.Add(this.label12);
+            this.tabPage6.Controls.Add(this.label21);
+            this.tabPage6.Controls.Add(this.comboBox2);
+            this.tabPage6.Controls.Add(this.textBox2);
+            this.tabPage6.Controls.Add(this.schedule_reportViewer);
+            this.tabPage6.Location = new System.Drawing.Point(4, 33);
+            this.tabPage6.Name = "tabPage6";
+            this.tabPage6.Size = new System.Drawing.Size(1226, 644);
+            this.tabPage6.TabIndex = 5;
+            this.tabPage6.Text = "Отчет с расписанием";
+            this.tabPage6.UseVisualStyleBackColor = true;
+            // 
+            // schedule_reportViewer
+            // 
+            this.schedule_reportViewer.Location = new System.Drawing.Point(0, 90);
+            this.schedule_reportViewer.Name = "schedule_reportViewer";
+            this.schedule_reportViewer.ServerReport.BearerToken = null;
+            this.schedule_reportViewer.Size = new System.Drawing.Size(1226, 558);
+            this.schedule_reportViewer.TabIndex = 1;
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label6.Location = new System.Drawing.Point(567, 10);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(250, 29);
+            this.label6.TabIndex = 26;
+            this.label6.Text = "Столбец для поиска";
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label7.Location = new System.Drawing.Point(954, 10);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(264, 29);
+            this.label7.TabIndex = 25;
+            this.label7.Text = "Значение для поиска";
+            // 
+            // comboBox1
+            // 
+            this.comboBox1.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox1.FormattingEnabled = true;
+            this.comboBox1.Location = new System.Drawing.Point(572, 48);
+            this.comboBox1.Name = "comboBox1";
+            this.comboBox1.Size = new System.Drawing.Size(245, 32);
+            this.comboBox1.TabIndex = 24;
+            // 
+            // textBox1
+            // 
+            this.textBox1.Location = new System.Drawing.Point(959, 48);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(259, 29);
+            this.textBox1.TabIndex = 23;
+            // 
+            // label12
+            // 
+            this.label12.AutoSize = true;
+            this.label12.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label12.Location = new System.Drawing.Point(567, 9);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(250, 29);
+            this.label12.TabIndex = 26;
+            this.label12.Text = "Столбец для поиска";
+            // 
+            // label21
+            // 
+            this.label21.AutoSize = true;
+            this.label21.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label21.Location = new System.Drawing.Point(954, 9);
+            this.label21.Name = "label21";
+            this.label21.Size = new System.Drawing.Size(264, 29);
+            this.label21.TabIndex = 25;
+            this.label21.Text = "Значение для поиска";
+            // 
+            // comboBox2
+            // 
+            this.comboBox2.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox2.FormattingEnabled = true;
+            this.comboBox2.Location = new System.Drawing.Point(572, 47);
+            this.comboBox2.Name = "comboBox2";
+            this.comboBox2.Size = new System.Drawing.Size(245, 32);
+            this.comboBox2.TabIndex = 24;
+            // 
+            // textBox2
+            // 
+            this.textBox2.Location = new System.Drawing.Point(959, 47);
+            this.textBox2.Name = "textBox2";
+            this.textBox2.Size = new System.Drawing.Size(259, 29);
+            this.textBox2.TabIndex = 23;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(11F, 24F);
@@ -914,6 +1048,10 @@
             this.tabPage4.ResumeLayout(false);
             this.tabPage4.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.lessontypes_dataGridView)).EndInit();
+            this.tabPage5.ResumeLayout(false);
+            this.tabPage5.PerformLayout();
+            this.tabPage6.ResumeLayout(false);
+            this.tabPage6.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -990,10 +1128,22 @@
         private System.Windows.Forms.ComboBox endtime_schedule_comboBox;
         private System.Windows.Forms.ComboBox starttime_schedule_comboBox;
         private System.Windows.Forms.DateTimePicker change_lessondate_scheduledateTimePicker;
-        private System.Windows.Forms.Button allschedule_button;
         private System.Windows.Forms.TextBox info_students_textBox;
         private System.Windows.Forms.Label mark_schedule_label;
         private System.Windows.Forms.TextBox mark_schedule_textBox;
+        private System.Windows.Forms.CheckBox allschedule_checkbox;
+        private System.Windows.Forms.TabPage tabPage5;
+        private System.Windows.Forms.TabPage tabPage6;
+        private Microsoft.Reporting.WinForms.ReportViewer students_reportViewer;
+        private Microsoft.Reporting.WinForms.ReportViewer schedule_reportViewer;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.ComboBox comboBox1;
+        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.Label label12;
+        private System.Windows.Forms.Label label21;
+        private System.Windows.Forms.ComboBox comboBox2;
+        private System.Windows.Forms.TextBox textBox2;
     }
 }
 

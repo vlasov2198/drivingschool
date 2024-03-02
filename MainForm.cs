@@ -11,6 +11,7 @@ using System.Data.SqlClient;
 using System.Configuration;
 using System.Globalization;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using Microsoft.Reporting.WinForms;
 
 namespace drivingschool
 {
@@ -29,7 +30,11 @@ namespace drivingschool
 
             sqlConnection.Open();
 
+            change_lessondate_scheduledateTimePicker.Value = DateTime.Now.Date;
             Refreshdball();
+            RefreshdbScheduleFromSelectDate();
+            this.students_reportViewer.RefreshReport();
+            this.schedule_reportViewer.RefreshReport();
         }
 
 
@@ -38,7 +43,7 @@ namespace drivingschool
             Refreshdbstudents();
             Refreshdblocations();
             Refreshdblessontypes();
-            RefreshdbScheduleFromSelectDate();
+
 
             RefreshTimeComboBox();
             RefreshStudentComboBox();
@@ -436,25 +441,35 @@ namespace drivingschool
             RefreshdbScheduleFromSelectDate();
         }
 
-        private void allschedule_button_Click(object sender, EventArgs e)
-        {
-            RefreshdbSchedule();
-        }
-
         private void RefreshdbScheduleFromSelectDate()
         {
             DateTime selectedDate = change_lessondate_scheduledateTimePicker.Value.Date;
 
-            SqlDataAdapter dataAdapter = new SqlDataAdapter(
-                "SELECT s.ScheduleID, s.LessonDate, s.StartTime, s.EndTime, st.FirstName + ' ' + st.LastName AS StudentName, " +
-                "l.Name AS LocationName, lt.Name AS LessonTypeName, s.Mark " +
-                "FROM Schedule s " +
-                "JOIN Students st ON s.StudentID = st.StudentID " +
-                "JOIN Locations l ON s.LocationID = l.LocationID " +
-                "JOIN LessonTypes lt ON s.LessonTypeID = lt.LessonTypeID " +
-                "WHERE s.LessonDate = @LessonDate", sqlConnection);
+            SqlDataAdapter dataAdapter;
 
-            dataAdapter.SelectCommand.Parameters.AddWithValue("@LessonDate", selectedDate);
+            if (allschedule_checkbox.Checked)
+            {
+                dataAdapter = new SqlDataAdapter(
+                    "SELECT s.ScheduleID, s.LessonDate, s.StartTime, s.EndTime, st.FirstName + ' ' + st.LastName AS StudentName, " +
+                    "l.Name AS LocationName, lt.Name AS LessonTypeName, s.Mark " +
+                    "FROM Schedule s " +
+                    "JOIN Students st ON s.StudentID = st.StudentID " +
+                    "JOIN Locations l ON s.LocationID = l.LocationID " +
+                    "JOIN LessonTypes lt ON s.LessonTypeID = lt.LessonTypeID", sqlConnection);
+            }
+            else
+            {
+                dataAdapter = new SqlDataAdapter(
+                    "SELECT s.ScheduleID, s.LessonDate, s.StartTime, s.EndTime, st.FirstName + ' ' + st.LastName AS StudentName, " +
+                    "l.Name AS LocationName, lt.Name AS LessonTypeName, s.Mark " +
+                    "FROM Schedule s " +
+                    "JOIN Students st ON s.StudentID = st.StudentID " +
+                    "JOIN Locations l ON s.LocationID = l.LocationID " +
+                    "JOIN LessonTypes lt ON s.LessonTypeID = lt.LessonTypeID " +
+                    "WHERE s.LessonDate = @LessonDate", sqlConnection);
+
+                dataAdapter.SelectCommand.Parameters.AddWithValue("@LessonDate", selectedDate);
+            }
 
             DataSet dataSet = new DataSet();
             dataAdapter.Fill(dataSet);
@@ -1158,7 +1173,7 @@ namespace drivingschool
                     if (rowsAffected > 0)
                     {
                         MessageBox.Show("Изменения успешно сохранены в базе данных", "Успех");
-                        RefreshdbSchedule();
+                        RefreshdbScheduleFromSelectDate();
                     }
                     else
                     {
@@ -1540,6 +1555,45 @@ namespace drivingschool
         private void changecolums_schedule_comboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             SearchSchedule();
+        }
+
+        private void allschedule_checkbox_CheckedChanged(object sender, EventArgs e)
+        {
+            RefreshdbScheduleFromSelectDate();
+        }
+
+        private void students_reportViewer_Load(object sender, EventArgs e)
+        {
+            UpdateReportStudents();
+            UpdateReportSchedule();
+        }
+
+        private void UpdateReportStudents()
+        {
+            SqlCommand command = new SqlCommand("Select * from Students", sqlConnection);
+            SqlDataAdapter d = new SqlDataAdapter(command);
+            DataTable dt = new DataTable();
+            d.Fill(dt);
+
+            students_reportViewer.LocalReport.DataSources.Clear();
+            ReportDataSource sourse = new ReportDataSource("DataSet_students", dt);
+            students_reportViewer.LocalReport.ReportPath = "Report_students.rdlc";
+            students_reportViewer.LocalReport.DataSources.Add(sourse);
+            students_reportViewer.RefreshReport();
+        }
+
+        private void UpdateReportSchedule()
+        {
+            SqlCommand command = new SqlCommand("Select * from Schedule", sqlConnection);
+            SqlDataAdapter d = new SqlDataAdapter(command);
+            DataTable dt = new DataTable();
+            d.Fill(dt);
+
+            schedule_reportViewer.LocalReport.DataSources.Clear();
+            ReportDataSource sourse = new ReportDataSource("DataSet_schedule", dt);
+            schedule_reportViewer.LocalReport.ReportPath = "Report_schedule.rdlc";
+            schedule_reportViewer.LocalReport.DataSources.Add(sourse);
+            schedule_reportViewer.RefreshReport();
         }
     }
 }
