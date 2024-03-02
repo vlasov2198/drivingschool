@@ -62,8 +62,8 @@
             this.label11 = new System.Windows.Forms.Label();
             this.label13 = new System.Windows.Forms.Label();
             this.label14 = new System.Windows.Forms.Label();
-            this.comboBox2 = new System.Windows.Forms.ComboBox();
-            this.textBox8 = new System.Windows.Forms.TextBox();
+            this.changecolums_schedule_comboBox = new System.Windows.Forms.ComboBox();
+            this.search_schedule_textBox = new System.Windows.Forms.TextBox();
             this.label15 = new System.Windows.Forms.Label();
             this.label16 = new System.Windows.Forms.Label();
             this.label17 = new System.Windows.Forms.Label();
@@ -330,8 +330,8 @@
             this.tabPage2.Controls.Add(this.label11);
             this.tabPage2.Controls.Add(this.label13);
             this.tabPage2.Controls.Add(this.label14);
-            this.tabPage2.Controls.Add(this.comboBox2);
-            this.tabPage2.Controls.Add(this.textBox8);
+            this.tabPage2.Controls.Add(this.changecolums_schedule_comboBox);
+            this.tabPage2.Controls.Add(this.search_schedule_textBox);
             this.tabPage2.Controls.Add(this.label15);
             this.tabPage2.Controls.Add(this.label16);
             this.tabPage2.Controls.Add(this.label17);
@@ -476,21 +476,23 @@
             this.label14.TabIndex = 39;
             this.label14.Text = "Место занятия";
             // 
-            // comboBox2
+            // changecolums_schedule_comboBox
             // 
-            this.comboBox2.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.comboBox2.FormattingEnabled = true;
-            this.comboBox2.Location = new System.Drawing.Point(552, 48);
-            this.comboBox2.Name = "comboBox2";
-            this.comboBox2.Size = new System.Drawing.Size(245, 32);
-            this.comboBox2.TabIndex = 37;
+            this.changecolums_schedule_comboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.changecolums_schedule_comboBox.FormattingEnabled = true;
+            this.changecolums_schedule_comboBox.Location = new System.Drawing.Point(552, 48);
+            this.changecolums_schedule_comboBox.Name = "changecolums_schedule_comboBox";
+            this.changecolums_schedule_comboBox.Size = new System.Drawing.Size(245, 32);
+            this.changecolums_schedule_comboBox.TabIndex = 37;
+            this.changecolums_schedule_comboBox.SelectedIndexChanged += new System.EventHandler(this.changecolums_schedule_comboBox_SelectedIndexChanged);
             // 
-            // textBox8
+            // search_schedule_textBox
             // 
-            this.textBox8.Location = new System.Drawing.Point(939, 48);
-            this.textBox8.Name = "textBox8";
-            this.textBox8.Size = new System.Drawing.Size(259, 29);
-            this.textBox8.TabIndex = 35;
+            this.search_schedule_textBox.Location = new System.Drawing.Point(939, 48);
+            this.search_schedule_textBox.Name = "search_schedule_textBox";
+            this.search_schedule_textBox.Size = new System.Drawing.Size(259, 29);
+            this.search_schedule_textBox.TabIndex = 35;
+            this.search_schedule_textBox.TextChanged += new System.EventHandler(this.search_schedule_textBox_TextChanged);
             // 
             // label15
             // 
@@ -943,8 +945,8 @@
         private System.Windows.Forms.Label label11;
         private System.Windows.Forms.Label label13;
         private System.Windows.Forms.Label label14;
-        private System.Windows.Forms.ComboBox comboBox2;
-        private System.Windows.Forms.TextBox textBox8;
+        private System.Windows.Forms.ComboBox changecolums_schedule_comboBox;
+        private System.Windows.Forms.TextBox search_schedule_textBox;
         private System.Windows.Forms.Label label15;
         private System.Windows.Forms.Label label16;
         private System.Windows.Forms.Label label17;

@@ -49,6 +49,7 @@ namespace drivingschool
             FillColumnsStudentsComboBox();
             FillColumnsLocationsComboBox();
             FillColumnsLessonTypesComboBox();
+            FillColumnsScheduleComboBox();
         }
 
 
@@ -90,6 +91,19 @@ namespace drivingschool
             }
 
             changecolums_lessontypes_comboBox.SelectedIndex = 0;
+        }
+
+        private void FillColumnsScheduleComboBox()
+        {
+            changecolums_schedule_comboBox.Items.Clear();
+            changecolums_schedule_comboBox.Items.Add("Все столбцы");
+
+            foreach (DataGridViewColumn column in schedule_dataGridView.Columns)
+            {
+                changecolums_schedule_comboBox.Items.Add(column.HeaderText);
+            }
+
+            changecolums_schedule_comboBox.SelectedIndex = 0;
         }
 
         private void Refreshdbstudents()
@@ -1439,6 +1453,93 @@ namespace drivingschool
         {
             SearchLessonTypes();
         }
-    }
 
+        Dictionary<string, string> ScheduleColumnTranslations = new Dictionary<string, string>
+        {
+            { "ID занятия", "ScheduleID" },
+            { "Дата занятия", "LessonDate" },
+            { "Время начала", "StartTime" },
+            { "Время конца", "EndTime" },
+            { "Курсант", "StudentID" },
+            { "Локация", "LocationID" },
+            { "Тип занятия", "LessonTypeID" },
+            { "Оценка", "Mark" }
+        };
+
+        private void SearchSchedule()
+        {
+            string selectedColumn = changecolums_schedule_comboBox.SelectedItem?.ToString();
+            string searchTerm = search_schedule_textBox.Text.Trim();
+
+            string searchQuery = "SELECT s.ScheduleID, s.LessonDate, s.StartTime, s.EndTime, st.FirstName + ' ' + st.LastName AS StudentName, " +
+                                 "l.Name AS LocationName, lt.Name AS LessonTypeName, s.Mark " +
+                                 "FROM Schedule s " +
+                                 "JOIN Students st ON s.StudentID = st.StudentID " +
+                                 "JOIN Locations l ON s.LocationID = l.LocationID " +
+                                 "JOIN LessonTypes lt ON s.LessonTypeID = lt.LessonTypeID ";
+
+            if (!string.IsNullOrEmpty(selectedColumn) && selectedColumn != "Все столбцы")
+            {
+                string englishColumnName = ScheduleColumnTranslations[selectedColumn];
+
+                if (englishColumnName == "StudentID")
+                {
+                    searchQuery += $"WHERE st.FirstName + ' ' + st.LastName LIKE @SearchTerm";
+                }
+                else if (englishColumnName == "LocationID")
+                {
+                    searchQuery += $"WHERE l.Name LIKE @SearchTerm";
+                }
+                else if (englishColumnName == "LessonTypeID")
+                {
+                    searchQuery += $"WHERE lt.Name LIKE @SearchTerm";
+                }
+                else if (englishColumnName == "LessonDate")
+                {
+                    // Предположим, что формат даты в вашей базе данных - "dd.MM.yyyy"
+                    searchQuery += $"WHERE CONVERT(varchar, s.LessonDate, 104) LIKE @SearchTerm";
+                }
+                else
+                {
+                    searchQuery += $"WHERE s.[{englishColumnName}] LIKE @SearchTerm";
+                }
+            }
+            else
+            {
+                searchQuery += "WHERE s.ScheduleID LIKE @SearchTerm OR " +
+                               "CONVERT(varchar, s.LessonDate, 104) LIKE @SearchTerm OR " +
+                               "s.StartTime LIKE @SearchTerm OR " +
+                               "s.EndTime LIKE @SearchTerm OR " +
+                               "st.FirstName + ' ' + st.LastName LIKE @SearchTerm OR " +
+                               "l.Name LIKE @SearchTerm OR " +
+                               "lt.Name LIKE @SearchTerm OR " +
+                               "s.Mark LIKE @SearchTerm";
+            }
+
+            SqlCommand searchScheduleCommand = new SqlCommand(searchQuery, sqlConnection);
+            searchScheduleCommand.Parameters.AddWithValue("@SearchTerm", $"%{searchTerm}%");
+
+            SqlDataAdapter adapter = new SqlDataAdapter(searchScheduleCommand);
+            DataTable dt = new DataTable();
+            adapter.Fill(dt);
+
+            schedule_dataGridView.DataSource = dt;
+
+            if (!string.IsNullOrEmpty(selectedColumn) && selectedColumn == "Все столбцы")
+            {
+                HighlightSearchResults(schedule_dataGridView, searchTerm);
+            }
+        }
+
+
+        private void search_schedule_textBox_TextChanged(object sender, EventArgs e)
+        {
+            SearchSchedule();
+        }
+
+        private void changecolums_schedule_comboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            SearchSchedule();
+        }
+    }
 }
